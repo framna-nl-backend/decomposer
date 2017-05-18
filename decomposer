@@ -1,0 +1,104 @@
+#!/bin/bash
+
+CWD=$(pwd)
+FILE=$CWD/decomposer.json
+TARGET_DIR=/var/www/libs/
+
+decomposer_install() {
+PACKAGE=$1
+
+echo -n "Installing $PACKAGE..."
+
+if ! [ $(jq ".|has(\"$PACKAGE\")" "$FILE") = "true" ]; then
+    echo "Package '$PACKAGE' not found!"
+    return
+fi
+
+URL=$(jq -r ".\"$PACKAGE\".url" "$FILE")
+VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
+
+cd "$TARGET_DIR"
+
+if ! [ -d "$PACKAGE-$VERSION" ]; then
+    git clone "$URL" "$PACKAGE-$VERSION" &> /dev/null
+
+    if ! [ "$?" = 0 ]; then
+        echo "Cloning git repository for '$PACKAGE' failed!"
+        return
+    fi
+fi
+
+cd "$PACKAGE-$VERSION"
+    if [ $(jq ".\"$PACKAGE\"|has(\"revision\")" "$FILE") = "true" ]; then
+        REVISION=$(jq -r ".\"$PACKAGE\".revision" "$FILE")
+    else
+        REVISION=$VERSION
+    fi
+
+    if [ $(git cat-file -t "$REVISION") ]; then
+        git reset --hard "$REVISION" &> /dev/null
+    else
+        echo "Revision $REVISION not found"
+        return
+    fi
+cd ..
+
+echo -e "<?php\n" > "$PACKAGE-$VERSION.php"
+
+if [ $(jq ".\"$PACKAGE\"|has(\"psr0\")" "$FILE") = "true" ]; then
+    PSR0_PATH=$(jq -r ".\"$PACKAGE\".psr0.path" "$FILE")
+
+    echo "set_include_path(" >> "$PACKAGE-$VERSION.php"
+    echo "    get_include_path() . ':' ." >> "$PACKAGE-$VERSION.php"
+    echo "    __DIR__ . '/${PACKAGE}-${VERSION}${PSR0_PATH}'" >> "$PACKAGE-$VERSION.php"
+    echo -e ");\n" >> "$PACKAGE-$VERSION.php"
+fi
+
+if [ $(jq ".\"$PACKAGE\"|has(\"includes\")" "$FILE") = "true" ]; then
+    INCLUDES=$(jq -r ".\"$PACKAGE\".includes|to_entries|map(\"\(.value|tostring)\")|.[]" "$FILE")
+
+    for i in "$INCLUDES"; do
+        echo -e "include_once '$i.php'" >> "$PACKAGE-$VERSION.php"
+    done
+
+    echo "" >> "$PACKAGE-$VERSION.php"
+fi
+
+if [ $(jq ".\"$PACKAGE\"|has(\"psr4\")" "$FILE") = "true" ]; then
+    PSR4_PREFIX=$(jq -r ".\"$PACKAGE\".psr4.prefix" "$FILE")
+    PSR4_PATH=$(jq -r ".\"$PACKAGE\".psr4.\"search-path\"" "$FILE")
+
+    echo -e "\$autoloader->set_prefix('$PSR4_PREFIX', '${PACKAGE}-${VERSION}${PSR4_PATH}');\n" >> "$PACKAGE-$VERSION.php"
+fi
+
+echo "?>" >> "$PACKAGE-$VERSION.php"
+
+echo "done"
+
+}
+
+COMMAND=""
+PACKAGES=""
+
+for i in $@; do
+  if [ "$COMMAND" = "" ]; then
+    COMMAND="$i"
+  else
+    PACKAGES="$PACKAGES $i"
+  fi
+done
+
+if [ -z "$PACKAGES" ]; then
+  PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
+fi
+
+case "$COMMAND" in
+    "install")
+        for package in $PACKAGES; do
+            decomposer_install $package
+        done
+        ;;
+    *)
+        echo "Unknown command!"
+        exit 1
+esac
