@@ -29,17 +29,24 @@ if ! [ -d "$PACKAGE-$VERSION" ]; then
 fi
 
 cd "$PACKAGE-$VERSION"
-    if [ $(jq ".\"$PACKAGE\"|has(\"revision\")" "$FILE") = "true" ]; then
-        REVISION=$(jq -r ".\"$PACKAGE\".revision" "$FILE")
-    else
-        REVISION=$VERSION
-    fi
+    if ! [ -f ".git" ]; then
+        if [ $(jq ".\"$PACKAGE\"|has(\"revision\")" "$FILE") = "true" ]; then
+            REVISION=$(jq -r ".\"$PACKAGE\".revision" "$FILE")
+        else
+            REVISION=$VERSION
+        fi
 
-    if [ $(git cat-file -t "$REVISION") ]; then
-        git reset --hard "$REVISION" &> /dev/null
-    else
-        echo "Revision $REVISION not found"
-        return
+        GIT_TYPE=$(git cat-file -t "$REVISION" 2> /dev/null)
+        GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
+
+        if [ "$GIT_TYPE" = "commit" -o "$GIT_TYPE" = "tag" ]; then
+            git reset --hard "$REVISION" &> /dev/null
+        elif [ "$GIT_ALT_TYPE" = "commit" -o "$GIT_ALT_TYPE" = "tag" ]; then
+            git reset --hard "v$REVISION" &> /dev/null
+        else
+            echo "Revision $REVISION not found"
+            return
+        fi
     fi
 cd ..
 
