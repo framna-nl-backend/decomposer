@@ -52,6 +52,12 @@ cd ..
 
 echo -e "<?php\n" > "$PACKAGE-$VERSION.php"
 
+if [ "$PACKAGE" = "Lunr" ]; then
+    echo "require_once '$PACKAGE-$VERSION/src/Lunr/Core/Autoloader.php';" >> "$PACKAGE-$VERSION.php"
+    echo "\$autoloader = new Lunr\Core\Autoloader();" >> "$PACKAGE-$VERSION.php"
+    echo -e "\$autoloader->register();\n" >> "$PACKAGE-$VERSION.php"
+fi
+
 if [ $(jq ".\"$PACKAGE\"|has(\"psr0\")" "$FILE") = "true" ]; then
     PSR0_PATH=$(jq -r ".\"$PACKAGE\".psr0.path" "$FILE")
 
