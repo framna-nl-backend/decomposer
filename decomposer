@@ -2,7 +2,7 @@
 
 CWD=$(pwd)
 FILE=$CWD/decomposer.json
-TARGET_DIR=/var/www/libs/
+TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
 
 decomposer_install() {
 PACKAGE=$1
