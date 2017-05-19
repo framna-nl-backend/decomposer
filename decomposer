@@ -101,7 +101,7 @@ for i in $@; do
   fi
 done
 
-if [ -z "$PACKAGES" ]; then
+if [ -z "$PACKAGES" -a -f "$FILE" ]; then
   PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
 fi
 
