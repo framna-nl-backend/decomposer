@@ -71,7 +71,7 @@ if [ $(jq ".\"$PACKAGE\"|has(\"includes\")" "$FILE") = "true" ]; then
     INCLUDES=$(jq -r ".\"$PACKAGE\".includes|to_entries|map(\"\(.value|tostring)\")|.[]" "$FILE")
 
     for i in "$INCLUDES"; do
-        echo -e "include_once '$i.php'" >> "$PACKAGE-$VERSION.php"
+        echo -e "include_once '$i.php';" >> "$PACKAGE-$VERSION.php"
     done
 
     echo "" >> "$PACKAGE-$VERSION.php"
