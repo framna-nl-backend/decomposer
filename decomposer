@@ -1,11 +1,11 @@
 #!/bin/bash
 
 CWD=$(pwd)
-FILE=$CWD/decomposer.json
 TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
 
 decomposer_install() {
 PACKAGE=$1
+FILE=$2
 
 echo -n "Installing $PACKAGE..."
 
@@ -88,6 +88,17 @@ echo "?>" >> "$PACKAGE-$VERSION.php"
 
 echo "done"
 
+if [ -f "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json" ]; then
+    SUBPACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$PACKAGE-$VERSION/decomposer.json")
+    echo -e "\nInstalling dependencies for '$PACKAGE'"
+    for subpackage in $SUBPACKAGES; do
+        (
+            decomposer_install $subpackage "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json"
+        )
+    done
+    echo ""
+fi
+
 }
 
 COMMAND=""
@@ -101,14 +112,14 @@ for i in $@; do
   fi
 done
 
-if [ -z "$PACKAGES" -a -f "$FILE" ]; then
-  PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
+if [ -z "$PACKAGES" -a -f "$CWD/decomposer.json" ]; then
+  PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$CWD/decomposer.json")
 fi
 
 case "$COMMAND" in
     "install")
         for package in $PACKAGES; do
-            decomposer_install $package
+            decomposer_install $package "$CWD/decomposer.json"
         done
         ;;
     *)
