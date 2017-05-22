@@ -10,8 +10,8 @@ FILE=$2
 echo -n "Installing $PACKAGE..."
 
 if ! [ $(jq ".|has(\"$PACKAGE\")" "$FILE") = "true" ]; then
-    echo "Package '$PACKAGE' not found!"
-    return
+  echo "Package '$PACKAGE' not found!"
+  return
 fi
 
 URL=$(jq -r ".\"$PACKAGE\".url" "$FILE")
@@ -20,76 +20,76 @@ VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
 cd "$TARGET_DIR"
 
 if ! [ -d "$PACKAGE-$VERSION" ]; then
-    git clone "$URL" "$PACKAGE-$VERSION" &> /dev/null
+  git clone "$URL" "$PACKAGE-$VERSION" &> /dev/null
 
-    if ! [ "$?" = 0 ]; then
-        echo "Cloning git repository for '$PACKAGE' failed!"
-        return
-    fi
+  if ! [ "$?" = 0 ]; then
+    echo "Cloning git repository for '$PACKAGE' failed!"
+    return
+  fi
 fi
 
 if ! [ -h "$PACKAGE-$VERSION" ]; then
-    cd "$PACKAGE-$VERSION"
+  cd "$PACKAGE-$VERSION"
     if ! [ -f ".git" ]; then
-        if [ $(jq ".\"$PACKAGE\"|has(\"revision\")" "$FILE") = "true" ]; then
-            REVISION=$(jq -r ".\"$PACKAGE\".revision" "$FILE")
-        else
-            REVISION=$VERSION
+      if [ $(jq ".\"$PACKAGE\"|has(\"revision\")" "$FILE") = "true" ]; then
+        REVISION=$(jq -r ".\"$PACKAGE\".revision" "$FILE")
+      else
+        REVISION=$VERSION
+      fi
+
+      GIT_TYPE=$(git cat-file -t "$REVISION" 2> /dev/null)
+      GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
+
+      REV_HEAD=$(git rev-parse HEAD)
+
+      if [ "$GIT_TYPE" = "commit" -o "$GIT_TYPE" = "tag" ]; then
+        if ! [ "$REV_HEAD" = "$(git rev-parse $REVISION)" ]; then
+          git reset --hard "$REVISION" &> /dev/null
         fi
-
-        GIT_TYPE=$(git cat-file -t "$REVISION" 2> /dev/null)
-        GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
-
-        REV_HEAD=$(git rev-parse HEAD)
-
-        if [ "$GIT_TYPE" = "commit" -o "$GIT_TYPE" = "tag" ]; then
-            if ! [ "$REV_HEAD" = "$(git rev-parse $REVISION)" ]; then
-                git reset --hard "$REVISION" &> /dev/null
-            fi
-        elif [ "$GIT_ALT_TYPE" = "commit" -o "$GIT_ALT_TYPE" = "tag" ]; then
-            if ! [ "$REV_HEAD" = "$(git rev-parse "v$REVISION")" ]; then
-                git reset --hard "v$REVISION" &> /dev/null
-            fi
-        else
-            echo "Revision $REVISION not found"
-            return
+      elif [ "$GIT_ALT_TYPE" = "commit" -o "$GIT_ALT_TYPE" = "tag" ]; then
+        if ! [ "$REV_HEAD" = "$(git rev-parse "v$REVISION")" ]; then
+          git reset --hard "v$REVISION" &> /dev/null
         fi
+      else
+        echo "Revision $REVISION not found"
+        return
+      fi
     fi
-    cd ..
+  cd ..
 fi
 
 echo -e "<?php\n" > "$PACKAGE-$VERSION.php"
 
 if [ "$PACKAGE" = "Lunr" ]; then
-    echo "require_once '$PACKAGE-$VERSION/src/Lunr/Core/Autoloader.php';" >> "$PACKAGE-$VERSION.php"
-    echo "\$autoloader = new Lunr\Core\Autoloader();" >> "$PACKAGE-$VERSION.php"
-    echo -e "\$autoloader->register();\n" >> "$PACKAGE-$VERSION.php"
+  echo "require_once '$PACKAGE-$VERSION/src/Lunr/Core/Autoloader.php';" >> "$PACKAGE-$VERSION.php"
+  echo "\$autoloader = new Lunr\Core\Autoloader();" >> "$PACKAGE-$VERSION.php"
+  echo -e "\$autoloader->register();\n" >> "$PACKAGE-$VERSION.php"
 fi
 
 if [ $(jq ".\"$PACKAGE\"|has(\"psr0\")" "$FILE") = "true" ]; then
-    PSR0_PATH=$(jq -r ".\"$PACKAGE\".psr0.path" "$FILE")
+  PSR0_PATH=$(jq -r ".\"$PACKAGE\".psr0.path" "$FILE")
 
-    echo "set_include_path(" >> "$PACKAGE-$VERSION.php"
-    echo "    get_include_path() . ':' ." >> "$PACKAGE-$VERSION.php"
-    echo "    __DIR__ . '/${PACKAGE}-${VERSION}${PSR0_PATH}'" >> "$PACKAGE-$VERSION.php"
-    echo -e ");\n" >> "$PACKAGE-$VERSION.php"
+  echo "set_include_path(" >> "$PACKAGE-$VERSION.php"
+  echo "    get_include_path() . ':' ." >> "$PACKAGE-$VERSION.php"
+  echo "    __DIR__ . '/${PACKAGE}-${VERSION}${PSR0_PATH}'" >> "$PACKAGE-$VERSION.php"
+  echo -e ");\n" >> "$PACKAGE-$VERSION.php"
 fi
 
 if [ $(jq ".\"$PACKAGE\"|has(\"includes\")" "$FILE") = "true" ]; then
-    INCLUDES=$(jq -r ".\"$PACKAGE\".includes|to_entries|map(\"\(.value|tostring)\")|.[]" "$FILE")
+  INCLUDES=$(jq -r ".\"$PACKAGE\".includes|to_entries|map(\"\(.value|tostring)\")|.[]" "$FILE")
 
-    for i in "$INCLUDES"; do
-        echo -e "include_once '$i.php';" >> "$PACKAGE-$VERSION.php"
-    done
+  for i in "$INCLUDES"; do
+    echo -e "include_once '$i.php';" >> "$PACKAGE-$VERSION.php"
+  done
 
-    echo "" >> "$PACKAGE-$VERSION.php"
+  echo "" >> "$PACKAGE-$VERSION.php"
 fi
 
 if [ $(jq ".\"$PACKAGE\"|has(\"psr4\")" "$FILE") = "true" ]; then
-    PSR4_PREFIX=$(jq -r ".\"$PACKAGE\".psr4.prefix" "$FILE")
-    PSR4_PATH=$(jq -r ".\"$PACKAGE\".psr4.\"search-path\"" "$FILE")
+  PSR4_PREFIX=$(jq -r ".\"$PACKAGE\".psr4.prefix" "$FILE")
+  PSR4_PATH=$(jq -r ".\"$PACKAGE\".psr4.\"search-path\"" "$FILE")
 
-    echo -e "\$autoloader->set_prefix('$PSR4_PREFIX', '${PACKAGE}-${VERSION}${PSR4_PATH}');\n" >> "$PACKAGE-$VERSION.php"
+  echo -e "\$autoloader->set_prefix('$PSR4_PREFIX', '${PACKAGE}-${VERSION}${PSR4_PATH}');\n" >> "$PACKAGE-$VERSION.php"
 fi
 
 echo "?>" >> "$PACKAGE-$VERSION.php"
@@ -97,14 +97,14 @@ echo "?>" >> "$PACKAGE-$VERSION.php"
 echo "done"
 
 if [ -f "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json" ]; then
-    SUBPACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$PACKAGE-$VERSION/decomposer.json")
-    echo -e "\nInstalling dependencies for '$PACKAGE'"
-    for subpackage in $SUBPACKAGES; do
-        (
-            decomposer_install $subpackage "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json"
-        )
-    done
-    echo ""
+  SUBPACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$PACKAGE-$VERSION/decomposer.json")
+  echo -e "\nInstalling dependencies for '$PACKAGE'"
+  for subpackage in $SUBPACKAGES; do
+    (
+      decomposer_install $subpackage "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json"
+    )
+  done
+  echo ""
 fi
 
 }
@@ -125,12 +125,12 @@ if [ -z "$PACKAGES" -a -f "$CWD/decomposer.json" ]; then
 fi
 
 case "$COMMAND" in
-    "install")
-        for package in $PACKAGES; do
-            decomposer_install $package "$CWD/decomposer.json"
-        done
-        ;;
-    *)
-        echo "Unknown command!"
-        exit 1
+  "install")
+    for package in $PACKAGES; do
+      decomposer_install $package "$CWD/decomposer.json"
+    done
+    ;;
+  *)
+    echo "Unknown command!"
+    exit 1
 esac
