@@ -28,7 +28,8 @@ if ! [ -d "$PACKAGE-$VERSION" ]; then
     fi
 fi
 
-cd "$PACKAGE-$VERSION"
+if ! [ -h "$PACKAGE-$VERSION" ]; then
+    cd "$PACKAGE-$VERSION"
     if ! [ -f ".git" ]; then
         if [ $(jq ".\"$PACKAGE\"|has(\"revision\")" "$FILE") = "true" ]; then
             REVISION=$(jq -r ".\"$PACKAGE\".revision" "$FILE")
@@ -39,16 +40,23 @@ cd "$PACKAGE-$VERSION"
         GIT_TYPE=$(git cat-file -t "$REVISION" 2> /dev/null)
         GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
 
+        REV_HEAD=$(git rev-parse HEAD)
+
         if [ "$GIT_TYPE" = "commit" -o "$GIT_TYPE" = "tag" ]; then
-            git reset --hard "$REVISION" &> /dev/null
+            if ! [ "$REV_HEAD" = "$(git rev-parse $REVISION)" ]; then
+                git reset --hard "$REVISION" &> /dev/null
+            fi
         elif [ "$GIT_ALT_TYPE" = "commit" -o "$GIT_ALT_TYPE" = "tag" ]; then
-            git reset --hard "v$REVISION" &> /dev/null
+            if ! [ "$REV_HEAD" = "$(git rev-parse "v$REVISION")" ]; then
+                git reset --hard "v$REVISION" &> /dev/null
+            fi
         else
             echo "Revision $REVISION not found"
             return
         fi
     fi
-cd ..
+    cd ..
+fi
 
 echo -e "<?php\n" > "$PACKAGE-$VERSION.php"
 
