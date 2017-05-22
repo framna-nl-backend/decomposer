@@ -3,11 +3,22 @@
 CWD=$(pwd)
 TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
 
+decomposer_collect_dependencies() {
+FILE=$1
+PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
+
+for PACKAGE in $PACKAGES; do
+  VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
+  if [ -f "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json" ]; then
+    DECOMPOSER_FILES+="$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json "
+    decomposer_collect_dependencies "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json"
+  fi
+done
+}
+
 decomposer_install() {
 PACKAGE=$1
 FILE=$2
-
-echo -n "Installing $PACKAGE..."
 
 if ! [ $(jq ".|has(\"$PACKAGE\")" "$FILE") = "true" ]; then
   echo "Package '$PACKAGE' not found!"
@@ -16,6 +27,14 @@ fi
 
 URL=$(jq -r ".\"$PACKAGE\".url" "$FILE")
 VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
+
+for INSTALLED in $INSTALLED_PACKAGES; do
+  if [ "$INSTALLED" = "$PACKAGE-$VERSION" ]; then
+    return
+  fi
+done
+
+echo -n "Installing $PACKAGE..."
 
 cd "$TARGET_DIR"
 
@@ -96,17 +115,16 @@ echo "?>" >> "$PACKAGE-$VERSION.php"
 
 echo "done"
 
-if [ -f "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json" ]; then
-  SUBPACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$PACKAGE-$VERSION/decomposer.json")
-  echo -e "\nInstalling dependencies for '$PACKAGE'"
-  for subpackage in $SUBPACKAGES; do
-    (
-      decomposer_install $subpackage "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json"
-    )
-  done
-  echo ""
-fi
+INSTALLED_PACKAGES+="$PACKAGE-$VERSION "
+}
 
+decomposer_process_file() {
+FILE=$1
+PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
+
+for package in $PACKAGES; do
+  decomposer_install $package "$FILE"
+done
 }
 
 COMMAND=""
@@ -120,14 +138,22 @@ for i in $@; do
   fi
 done
 
-if [ -z "$PACKAGES" -a -f "$CWD/decomposer.json" ]; then
-  PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$CWD/decomposer.json")
-fi
-
 case "$COMMAND" in
   "install")
-    for package in $PACKAGES; do
-      decomposer_install $package "$CWD/decomposer.json"
+    if ! [ -f "$CWD/decomposer.json" ]; then
+      echo "No decomposer.json found."
+      exit 1
+    fi
+
+    DECOMPOSER_FILES=""
+    decomposer_collect_dependencies "$CWD/decomposer.json"
+
+    INSTALLED_PACKAGES=""
+    decomposer_process_file "$CWD/decomposer.json"
+
+    for JSON in $DECOMPOSER_FILES; do
+      echo -e "\nInstalling dependencies for '$JSON':"
+      decomposer_process_file "$JSON"
     done
     ;;
   *)
