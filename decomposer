@@ -128,13 +128,13 @@ done
 }
 
 COMMAND=""
-PACKAGES=""
+SELECTIVE=""
 
 for i in $@; do
   if [ "$COMMAND" = "" ]; then
     COMMAND="$i"
   else
-    PACKAGES="$PACKAGES $i"
+    SELECTIVE="$SELECTIVE $i"
   fi
 done
 
@@ -148,15 +148,28 @@ case "$COMMAND" in
     DECOMPOSER_FILES=""
     decomposer_collect_dependencies "$CWD/decomposer.json"
 
-    INSTALLED_PACKAGES=""
-    decomposer_process_file "$CWD/decomposer.json"
+    if [ -z "$SELECTIVE" ]; then
+      INSTALLED_PACKAGES=""
+      decomposer_process_file "$CWD/decomposer.json"
 
-    for JSON in $DECOMPOSER_FILES; do
-      PACKAGE=${JSON#$TARGET_DIR/}
-      PACKAGE=${PACKAGE%/decomposer.json}
-      echo -e "\nInstalling dependencies for '$PACKAGE':"
-      decomposer_process_file "$JSON"
-    done
+      for JSON in $DECOMPOSER_FILES; do
+        PACKAGE=${JSON#$TARGET_DIR/}
+        PACKAGE=${PACKAGE%/decomposer.json}
+        echo -e "\nInstalling dependencies for '$PACKAGE':"
+        decomposer_process_file "$JSON"
+      done
+    else
+      DECOMPOSER_FILES="$CWD/decomposer.json $DECOMPOSER_FILES"
+
+      for PACKAGE in $SELECTIVE; do
+        for JSON in $DECOMPOSER_FILES; do
+          if [ $(jq ".|has(\"$PACKAGE\")" "$JSON") = "true" ]; then
+            decomposer_install $PACKAGE "$JSON"
+            break
+          fi
+        done
+      done
+    fi
     ;;
   *)
     echo "Unknown command!"
