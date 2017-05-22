@@ -152,7 +152,9 @@ case "$COMMAND" in
     decomposer_process_file "$CWD/decomposer.json"
 
     for JSON in $DECOMPOSER_FILES; do
-      echo -e "\nInstalling dependencies for '$JSON':"
+      PACKAGE=${JSON#$TARGET_DIR/}
+      PACKAGE=${PACKAGE%/decomposer.json}
+      echo -e "\nInstalling dependencies for '$PACKAGE':"
       decomposer_process_file "$JSON"
     done
     ;;
