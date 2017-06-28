@@ -163,7 +163,11 @@ case "$COMMAND" in
       done
     fi
     ;;
+  '')
+    echo "Missing command!"
+    exit 1
+    ;;
   *)
-    echo "Unknown command!"
+    echo "Invalid command!"
     exit 1
 esac
