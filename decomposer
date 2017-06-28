@@ -127,16 +127,8 @@ for package in $PACKAGES; do
 done
 }
 
-COMMAND=""
-SELECTIVE=""
-
-for i in $@; do
-  if [ "$COMMAND" = "" ]; then
-    COMMAND="$i"
-  else
-    SELECTIVE="$SELECTIVE $i"
-  fi
-done
+COMMAND="$1"
+SELECTIVE="${@:2}"
 
 case "$COMMAND" in
   "install")
