@@ -39,7 +39,7 @@ fi
 
 URL=$(jq -r ".\"$PACKAGE\".url" "$FILE")
 VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
-SUB_DIR=$(jq -r ".\"$PACKAGE\".dir" "$FILE")
+SUB_DIR=$(jq -r ".\"$PACKAGE\".\"target-dir\"" "$FILE")
 for INSTALLED in $INSTALLED_PACKAGES; do
   if [ "$INSTALLED" = "$PACKAGE-$VERSION" ]; then
     return
@@ -51,7 +51,7 @@ echo -n "Installing $PACKAGE..."
 cd "$TARGET_DIR"
 
 if ! [ -d "$PACKAGE-$VERSION" ]; then
-  if [ -z "$SUB_DIR" ]; then
+  if [ "$SUB_DIR" == "null" ]; then
     git clone "$URL" "$PACKAGE-$VERSION" &> /dev/null
   else
     git clone "$URL" "$PACKAGE-$VERSION$SUB_DIR" &> /dev/null
@@ -64,7 +64,11 @@ if ! [ -d "$PACKAGE-$VERSION" ]; then
 fi
 
 if ! [ -h "$PACKAGE-$VERSION" ]; then
-  cd "$PACKAGE-$VERSION"
+  if [ "$SUB_DIR" == "null" ]; then
+    cd "$PACKAGE-$VERSION"
+  else
+    cd "$PACKAGE-$VERSION$SUB_DIR"
+  fi
     if ! [ -f ".git" ]; then
       if [ $(jq ".\"$PACKAGE\"|has(\"revision\")" "$FILE") = "true" ]; then
         REVISION=$(jq -r ".\"$PACKAGE\".revision" "$FILE")
@@ -90,7 +94,7 @@ if ! [ -h "$PACKAGE-$VERSION" ]; then
         return
       fi
     fi
-  cd ..
+  cd $TARGET_DIR
 fi
 
 echo -e "<?php\n" > "$PACKAGE-$VERSION.php"
