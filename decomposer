@@ -81,6 +81,8 @@ if ! [ -h "$PACKAGE-$VERSION" ]; then
 
       REV_HEAD=$(git rev-parse HEAD)
 
+      git fetch origin &> /dev/null
+
       if [ "$GIT_TYPE" = "commit" -o "$GIT_TYPE" = "tag" ]; then
         if ! [ "$REV_HEAD" = "$(git rev-parse $REVISION)" ]; then
           git reset --hard "$REVISION" &> /dev/null
