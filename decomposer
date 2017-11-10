@@ -83,8 +83,14 @@ if ! [ -h "$PACKAGE-$VERSION" ]; then
 
       git fetch origin &> /dev/null
 
+      REV_ORIGIN=$(git branch -a | grep /origin/$REVISION)
+
       if [ "$GIT_TYPE" = "commit" -o "$GIT_TYPE" = "tag" ]; then
-        if ! [ "$REV_HEAD" = "$(git rev-parse $REVISION)" ]; then
+        if ! [ -z $REV_ORIGIN ]; then
+          if ! [ "$REV_HEAD" = "$(git rev-parse origin/$REVISION)" ]; then
+            git reset --hard "origin/$REVISION" &> /dev/null
+          fi
+        elif ! [ "$REV_HEAD" = "$(git rev-parse $REVISION)" ]; then
           git reset --hard "$REVISION" &> /dev/null
         fi
       elif [ "$GIT_ALT_TYPE" = "commit" -o "$GIT_ALT_TYPE" = "tag" ]; then
