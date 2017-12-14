@@ -155,6 +155,29 @@ for package in $PACKAGES; do
 done
 }
 
+decomposer_create_autoload() {
+FILE=$1
+PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
+AUTOLOAD="$CWD/decomposer.autoload.inc.php"
+
+echo -e "<?php\n" > $AUTOLOAD
+
+if [ -e "$CWD/src/Lunr/Core/Autoloader.php" ]; then
+  echo "require_once __DIR__ . '/src/Lunr/Core/Autoloader.php';" >> $AUTOLOAD
+  echo "\$autoloader = new Lunr\Core\Autoloader();" >> $AUTOLOAD
+  echo -e "\$autoloader->register();\n" >> $AUTOLOAD
+fi
+
+for PACKAGE in $PACKAGES; do
+  VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
+
+  echo "require_once '$PACKAGE-$VERSION.php';" >> $AUTOLOAD
+done
+
+echo -e "\n?>" >> $AUTOLOAD
+
+}
+
 COMMAND="$1"
 SELECTIVE="${@:2}"
 
@@ -178,6 +201,8 @@ case "$COMMAND" in
         echo -e "\nInstalling dependencies for '$PACKAGE':"
         decomposer_process_file "$JSON"
       done
+
+      decomposer_create_autoload "$CWD/decomposer.json"
     else
       DECOMPOSER_FILES="$CWD/decomposer.json $DECOMPOSER_FILES"
 
