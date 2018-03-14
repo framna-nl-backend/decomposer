@@ -15,19 +15,6 @@ Commands:
 EOF
 }
 
-decomposer_collect_dependencies() {
-FILE=$1
-PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
-
-for PACKAGE in $PACKAGES; do
-  VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
-  if [ -f "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json" ]; then
-    DECOMPOSER_FILES+="$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json "
-    decomposer_collect_dependencies "$TARGET_DIR/$PACKAGE-$VERSION/decomposer.json"
-  fi
-done
-}
-
 decomposer_install() {
 PACKAGE=$1
 FILE=$2
@@ -188,31 +175,17 @@ case "$COMMAND" in
       exit 1
     fi
 
-    DECOMPOSER_FILES=""
-    decomposer_collect_dependencies "$CWD/decomposer.json"
-
     if [ -z "$SELECTIVE" ]; then
       INSTALLED_PACKAGES=""
       decomposer_process_file "$CWD/decomposer.json"
 
-      for JSON in $DECOMPOSER_FILES; do
-        PACKAGE=${JSON#$TARGET_DIR/}
-        PACKAGE=${PACKAGE%/decomposer.json}
-        echo -e "\nInstalling dependencies for '$PACKAGE':"
-        decomposer_process_file "$JSON"
-      done
-
       decomposer_create_autoload "$CWD/decomposer.json"
     else
-      DECOMPOSER_FILES="$CWD/decomposer.json $DECOMPOSER_FILES"
-
       for PACKAGE in $SELECTIVE; do
-        for JSON in $DECOMPOSER_FILES; do
-          if [ $(jq ".|has(\"$PACKAGE\")" "$JSON") = "true" ]; then
-            decomposer_install $PACKAGE "$JSON"
-            break
-          fi
-        done
+        if [ $(jq ".|has(\"$PACKAGE\")" "$CWD/decomposer.json") = "true" ]; then
+          decomposer_install $PACKAGE "$CWD/decomposer.json"
+          break
+        fi
       done
     fi
     ;;
