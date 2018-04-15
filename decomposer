@@ -94,12 +94,6 @@ fi
 
 echo -e "<?php\n" > "$PACKAGE-$VERSION.php"
 
-if [ "$PACKAGE" = "Lunr" ]; then
-  echo "require_once '$PACKAGE-$VERSION/src/Lunr/Core/Autoloader.php';" >> "$PACKAGE-$VERSION.php"
-  echo "\$autoloader = new Lunr\Core\Autoloader();" >> "$PACKAGE-$VERSION.php"
-  echo -e "\$autoloader->register();\n" >> "$PACKAGE-$VERSION.php"
-fi
-
 if [ $(jq ".\"$PACKAGE\"|has(\"psr0\")" "$FILE") = "true" ]; then
   PSR0_PATH=$(jq -r ".\"$PACKAGE\".psr0.path" "$FILE")
 
@@ -123,7 +117,7 @@ if [ $(jq ".\"$PACKAGE\"|has(\"psr4\")" "$FILE") = "true" ]; then
   PSR4_PREFIX=$(jq -r ".\"$PACKAGE\".psr4.prefix" "$FILE")
   PSR4_PATH=$(jq -r ".\"$PACKAGE\".psr4.\"search-path\"" "$FILE")
 
-  echo -e "\$autoloader->set_prefix('$PSR4_PREFIX', '${PACKAGE}-${VERSION}${PSR4_PATH}');\n" >> "$PACKAGE-$VERSION.php"
+  echo -e "autoload_register_psr4_prefix('$PSR4_PREFIX', '${PACKAGE}-${VERSION}${PSR4_PATH}');\n" >> "$PACKAGE-$VERSION.php"
 fi
 
 echo "?>" >> "$PACKAGE-$VERSION.php"
