@@ -143,12 +143,6 @@ AUTOLOAD="$CWD/decomposer.autoload.inc.php"
 
 echo -e "<?php\n" > $AUTOLOAD
 
-if [ -e "$CWD/src/Lunr/Core/Autoloader.php" ]; then
-  echo "require_once __DIR__ . '/src/Lunr/Core/Autoloader.php';" >> $AUTOLOAD
-  echo "\$autoloader = new Lunr\Core\Autoloader();" >> $AUTOLOAD
-  echo -e "\$autoloader->register();\n" >> $AUTOLOAD
-fi
-
 for PACKAGE in $PACKAGES; do
   VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
 
