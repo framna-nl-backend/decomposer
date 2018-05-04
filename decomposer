@@ -138,10 +138,19 @@ done
 
 decomposer_create_autoload() {
 FILE=$1
+DEVELOP=$2
 PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
 AUTOLOAD="$CWD/decomposer.autoload.inc.php"
 
 echo -e "<?php\n" > $AUTOLOAD
+
+if [ "$DEVELOP" = "develop" ]; then
+  MD5=$(md5sum "$CWD/decomposer.json" | cut -d " " -f 1)
+
+  echo -e "if (md5_file(__DIR__ . '/decomposer.json') != '$MD5')\n{" >> $AUTOLOAD
+  echo -e "    die(\"Decomposer autoload file is outdated. Please re-run 'decomposer develop'\n\");" >> $AUTOLOAD
+  echo -e "}\n" >> $AUTOLOAD
+fi
 
 for PACKAGE in $PACKAGES; do
   VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
@@ -157,7 +166,7 @@ COMMAND="$1"
 SELECTIVE="${@:2}"
 
 case "$COMMAND" in
-  "install")
+  'install')
     if ! [ -f "$CWD/decomposer.json" ]; then
       echo "No decomposer.json found."
       exit 1
@@ -168,6 +177,26 @@ case "$COMMAND" in
       decomposer_process_file "$CWD/decomposer.json"
 
       decomposer_create_autoload "$CWD/decomposer.json"
+    else
+      for PACKAGE in $SELECTIVE; do
+        if [ $(jq ".|has(\"$PACKAGE\")" "$CWD/decomposer.json") = "true" ]; then
+          decomposer_install $PACKAGE "$CWD/decomposer.json"
+          break
+        fi
+      done
+    fi
+    ;;
+  'develop')
+    if ! [ -f "$CWD/decomposer.json" ]; then
+      echo "No decomposer.json found."
+      exit 1
+    fi
+
+    if [ -z "$SELECTIVE" ]; then
+      INSTALLED_PACKAGES=""
+      decomposer_process_file "$CWD/decomposer.json"
+
+      decomposer_create_autoload "$CWD/decomposer.json" "develop"
     else
       for PACKAGE in $SELECTIVE; do
         if [ $(jq ".|has(\"$PACKAGE\")" "$CWD/decomposer.json") = "true" ]; then
