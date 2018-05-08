@@ -8,9 +8,15 @@ usage() {
 cat << EOF
 usage: ${SCRIPT_NAME} <command> [<library>...]
 
+Manage a PHP project libraries
+Rely on decomposer.json file in working directory
+
 Commands:
   install    install the libraries
              only the specified ones if any, all otherwise
+             and generate an include file
+  develop    same as install
+             add an extra check to error out if include file is outdated
   help       display this message
 EOF
 }
