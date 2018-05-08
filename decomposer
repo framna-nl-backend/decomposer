@@ -21,6 +21,12 @@ Commands:
 EOF
 }
 
+error() {
+  [[ -z "$1" ]] || echo "${SCRIPT_NAME}: $1" >&2
+  echo "Try '${SCRIPT_NAME} help' for more information."
+  exit 1
+}
+
 decomposer_install() {
 PACKAGE=$1
 FILE=$2
@@ -174,8 +180,7 @@ SELECTIVE="${@:2}"
 case "$COMMAND" in
   'install')
     if ! [ -f "$CWD/decomposer.json" ]; then
-      echo "No decomposer.json found."
-      exit 1
+      error "No decomposer.json found."
     fi
 
     if [ -z "$SELECTIVE" ]; then
@@ -194,8 +199,7 @@ case "$COMMAND" in
     ;;
   'develop')
     if ! [ -f "$CWD/decomposer.json" ]; then
-      echo "No decomposer.json found."
-      exit 1
+      error "No decomposer.json found."
     fi
 
     if [ -z "$SELECTIVE" ]; then
@@ -217,10 +221,8 @@ case "$COMMAND" in
     exit
     ;;
   '')
-    echo "Missing command!"
-    exit 1
+    error "Missing command!"
     ;;
   *)
-    echo "Invalid command!"
-    exit 1
+    error "Invalid command!"
 esac
