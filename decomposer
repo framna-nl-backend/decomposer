@@ -75,14 +75,19 @@ if ! [ -h "$PACKAGE-$VERSION" ]; then
         REVISION=$VERSION
       fi
 
-      GIT_TYPE=$(git cat-file -t "$REVISION" 2> /dev/null)
-      GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
-
-      REV_HEAD=$(git rev-parse HEAD)
-
       git fetch origin &> /dev/null
 
       REV_ORIGIN=$(git branch -a | grep /origin/$REVISION)
+
+      if [ -z $REV_ORIGIN ]; then
+        GIT_TYPE=$(git cat-file -t "$REVISION" 2> /dev/null)
+        GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
+      else
+        GIT_TYPE=$(git cat-file -t "origin/$REVISION" 2> /dev/null)
+        GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
+      fi
+
+      REV_HEAD=$(git rev-parse HEAD)
 
       if [ "$GIT_TYPE" = "commit" -o "$GIT_TYPE" = "tag" ]; then
         if ! [ -z $REV_ORIGIN ]; then
