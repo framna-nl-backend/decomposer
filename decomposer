@@ -153,6 +153,14 @@ for package in $PACKAGES; do
 done
 }
 
+md5checksum() {
+  if ! [ -z $(which md5sum 2>/dev/null) ]; then
+    md5sum "$@" | cut -d " " -f 1
+  else
+    md5 -q "$@"
+  fi
+}
+
 decomposer_create_autoload() {
 FILE=$1
 DEVELOP=$2
@@ -162,7 +170,7 @@ AUTOLOAD="$CWD/decomposer.autoload.inc.php"
 echo -e "<?php\n" > $AUTOLOAD
 
 if [ "$DEVELOP" = "develop" ]; then
-  MD5=$(md5sum "$CWD/decomposer.json" | cut -d " " -f 1)
+  MD5=$(md5checksum "$CWD/decomposer.json")
 
   echo -e "if (md5_file(__DIR__ . '/decomposer.json') != '$MD5')\n{" >> $AUTOLOAD
   echo -e "    die(\"Decomposer autoload file is outdated. Please re-run 'decomposer develop'\n\");" >> $AUTOLOAD
