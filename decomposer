@@ -154,11 +154,16 @@ done
 }
 
 md5checksum() {
-  if ! [ -z $(which md5sum 2>/dev/null) ]; then
-    md5sum "$@" | cut -d " " -f 1
-  else
-    md5 -q "$@"
-  fi
+  local file="$1"
+
+  case "$( uname )" in
+    'Linux')
+      md5sum "${file}" | cut -f1 -d' '
+      ;;
+    'Darwin')
+      md5 -q "${file}"
+      ;;
+  esac
 }
 
 decomposer_create_autoload() {
