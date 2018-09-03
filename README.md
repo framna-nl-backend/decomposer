@@ -84,3 +84,14 @@ where the PHP libraries are located.
 
 The `psr-4` configuration contains `prefix`, which holds the namespace prefix to register with PSR-4, as well as
 `search-path`, which holds the relative path from the libraries repository root where the PHP libraries are located.
+
+Tests
+===
+
+To run the tests, you also need to have:
+
+* [bats](https://github.com/sstephenson/bats) - Testing framework for Bash
+
+Then you can run all the tests with the following command:
+
+  `bats tests`
