@@ -34,13 +34,15 @@ create_repository() {
   local name="$1"
 
   {
-    mkdir "${TEST_REPOS_DIR}/${name}"
-    cd "${TEST_REPOS_DIR}/${name}"
-    git init
-    git commit --allow-empty --message 'commit 1'
-    REVISION_HASH=$( git rev-parse HEAD )
-    cd -
+    git init "${TEST_REPOS_DIR}/${name}"
+    git -C "${TEST_REPOS_DIR}/${name}" commit \
+      --allow-empty --message 'commit 1'
   } > /dev/null
+
+  REVISION_HASH=$(
+    git -C "${TEST_REPOS_DIR}/${name}" \
+      rev-parse HEAD
+  )
 }
 
 assert_lib_folder() {
@@ -50,11 +52,11 @@ assert_lib_folder() {
 
   [ -d "${TARGET_DIR}/${name}" ]
 
-  cd "${TARGET_DIR}/${name}"
   local result_head_hash=$(
-    git rev-parse --verify "HEAD^{${expected_head_type}}"
+    git -C "${TARGET_DIR}/${name}" \
+      rev-parse --verify \
+      "HEAD^{${expected_head_type}}"
   )
-  cd -
 
   [ "${expected_head_hash}" == "${result_head_hash}" ]
 }
