@@ -1,9 +1,9 @@
 # environment variables used by decomposer internally
-export TARGET_DIR="${BATS_TMPDIR}/libs"
+export TARGET_DIR="${BATS_TMPDIR}/decomposer/libs"
 
 # environment variables used by the tests only
-export TEST_WORKING_DIR="${BATS_TMPDIR}/working_dir"
-export TEST_REPOS_DIR="${BATS_TMPDIR}/repositories"
+export TEST_WORKING_DIR="${BATS_TMPDIR}/decomposer/working_dir"
+export TEST_REPOS_DIR="${BATS_TMPDIR}/decomposer/repositories"
 export TEST_DECOMPOSER_PATH="${BATS_TEST_DIRNAME}/../decomposer"
 
 setup() {
