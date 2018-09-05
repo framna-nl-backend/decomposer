@@ -47,10 +47,12 @@ create_repository() {
       --allow-empty --message 'commit 1'
   } > /dev/null
 
-  REVISION_HASH=$(
+  local revision_hash=$(
     git -C "${TEST_REPOS_DIR}/${name}" \
       rev-parse HEAD
   )
+
+  echo "${revision_hash}"
 }
 
 assert_lib_folder() {

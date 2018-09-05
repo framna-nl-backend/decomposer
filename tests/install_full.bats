@@ -27,8 +27,7 @@ EOF
 )
   create_decomposer_json "${decomposer_json}"
 
-  create_repository lib1
-  local lib1_revision_hash="${REVISION_HASH}"
+  local lib1_revision_hash="$( create_repository lib1 )"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
