@@ -57,15 +57,13 @@ create_repository() {
 
 assert_lib_folder() {
   local name="$1"
-  local expected_head_type="$2"
-  local expected_head_hash="$3"
+  local expected_head_hash="$2"
 
   [ -d "${TARGET_DIR}/${name}" ]
 
   local result_head_hash=$(
     git -C "${TARGET_DIR}/${name}" \
-      rev-parse --verify \
-      "HEAD^{${expected_head_type}}"
+      rev-parse --verify HEAD
   )
 
   [ "${expected_head_hash}" == "${result_head_hash}" ]

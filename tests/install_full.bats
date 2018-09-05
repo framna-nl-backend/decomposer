@@ -32,7 +32,7 @@ EOF
   run_decomposer install
   [ "${status}" -eq 0 ]
 
-  assert_lib_folder Library_1-1.0 commit "${lib1_revision_hash}"
+  assert_lib_folder Library_1-1.0 "${lib1_revision_hash}"
 
   local expected_lib1_file=$(
 cat << EOF
