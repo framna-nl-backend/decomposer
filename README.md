@@ -95,3 +95,5 @@ To run the tests, you also need to have:
 Then you can run all the tests with the following command:
 
   `bats tests`
+
+Test files must be located one level below the `tests` folder with a `.bats` extension.
