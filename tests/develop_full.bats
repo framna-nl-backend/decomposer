@@ -1,6 +1,8 @@
 load helpers
 
-@test "develop full: no decomposer.json" {
+SUITE_NAME=$( test_suite_name )
+
+@test "${SUITE_NAME}: no decomposer.json" {
   run_decomposer develop
   [ "${status}" -eq 1 ]
   [ "${lines[0]}" = "decomposer: No decomposer.json found." ]
