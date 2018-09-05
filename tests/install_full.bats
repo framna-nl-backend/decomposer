@@ -8,7 +8,8 @@ load helpers
 }
 
 @test "install full: single new lib" {
-  cat << EOF > "${TEST_WORKING_DIR}/decomposer.json"
+  local decomposer_json=$(
+cat << EOF
 {
     "Library_1": {
         "url": "${TEST_REPOS_DIR}/lib1",
@@ -21,28 +22,18 @@ load helpers
      }
 }
 EOF
+)
+  create_decomposer_json "${decomposer_json}"
 
-  {
-    mkdir "${TEST_REPOS_DIR}/lib1"
-    cd "${TEST_REPOS_DIR}/lib1"
-    git init
-    git commit --allow-empty --message 'commit 1'
-    LIB1_COMMIT_HASH=$( git rev-parse HEAD )
-    cd -
-  } > /dev/null
+  create_repository lib1
+  local lib1_revision_hash="${REVISION_HASH}"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
 
-  {
-    [ -d "${TARGET_DIR}/Library_1-1.0" ]
-    cd "${TARGET_DIR}/Library_1-1.0"
-    [ $( git rev-parse --verify 'HEAD^{commit}' ) == "${LIB1_COMMIT_HASH}" ]
-    cd -
-  }
+  assert_lib_folder Library_1-1.0 commit "${lib1_revision_hash}"
 
-  [ -f "${TARGET_DIR}/Library_1-1.0.php" ]
-  expected_lib1_php=$(
+  local expected_lib1_file=$(
 cat << EOF
 <?php
 
@@ -51,11 +42,9 @@ autoload_register_psr4_prefix('lib1', 'Library_1-1.0/src/Lib1/');
 ?>
 EOF
 )
-  result_lib1_php=$( cat "${TARGET_DIR}/Library_1-1.0.php" )
-  [ "${expected_lib1_php}" == "${result_lib1_php}" ]
+  assert_lib_file Library_1-1.0 "${expected_lib1_file}"
 
-  [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
-  expected_autoload_php=$(
+  local expected_autoload_file=$(
 cat << EOF
 <?php
 
@@ -64,6 +53,5 @@ require_once 'Library_1-1.0.php';
 ?>
 EOF
 )
-  result_autoload_php=$( cat "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" )
-  [ "${expected_autoload_php}" == "${result_autoload_php}" ]
+  assert_autoload_file "${expected_autoload_file}"
 }

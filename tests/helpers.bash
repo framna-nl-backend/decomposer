@@ -23,3 +23,63 @@ teardown() {
 run_decomposer() {
   run "${DECOMPOSER_PATH}" "$@"
 }
+
+create_decomposer_json() {
+  local content="$1"
+
+  echo "${content}" > "${TEST_WORKING_DIR}/decomposer.json"
+}
+
+create_repository() {
+  local name="$1"
+
+  {
+    mkdir "${TEST_REPOS_DIR}/${name}"
+    cd "${TEST_REPOS_DIR}/${name}"
+    git init
+    git commit --allow-empty --message 'commit 1'
+    REVISION_HASH=$( git rev-parse HEAD )
+    cd -
+  } > /dev/null
+}
+
+assert_lib_folder() {
+  local name="$1"
+  local expected_head_type="$2"
+  local expected_head_hash="$3"
+
+  [ -d "${TARGET_DIR}/${name}" ]
+
+  cd "${TARGET_DIR}/${name}"
+  local result_head_hash=$(
+    git rev-parse --verify "HEAD^{${expected_head_type}}"
+  )
+  cd -
+
+  [ "${expected_head_hash}" == "${result_head_hash}" ]
+}
+
+assert_lib_file() {
+  local name="$1"
+  local expected_content="$2"
+
+  [ -f "${TARGET_DIR}/${name}.php" ]
+
+  local result_content=$(
+    cat "${TARGET_DIR}/${name}.php"
+  )
+
+  [ "${expected_content}" == "${result_content}" ]
+}
+
+assert_autoload_file() {
+  local expected_content="$1"
+
+  [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
+
+  local result_content=$(
+    cat "${TEST_WORKING_DIR}/decomposer.autoload.inc.php"
+  )
+
+  [ "${expected_content}" == "${result_content}" ]
+}
