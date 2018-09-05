@@ -1,10 +1,10 @@
-export TEST_WORKING_DIR="${BATS_TMPDIR}/working_dir"
-
-export TEST_REPOS_DIR="${BATS_TMPDIR}/repositories"
-
+# environment variables used by decomposer internally
 export TARGET_DIR="${BATS_TMPDIR}/libs"
 
-export DECOMPOSER_PATH="${BATS_TEST_DIRNAME}/../decomposer"
+# environment variables used by the tests only
+export TEST_WORKING_DIR="${BATS_TMPDIR}/working_dir"
+export TEST_REPOS_DIR="${BATS_TMPDIR}/repositories"
+export TEST_DECOMPOSER_PATH="${BATS_TEST_DIRNAME}/../decomposer"
 
 setup() {
   mkdir -p "${TARGET_DIR}"
@@ -21,7 +21,7 @@ teardown() {
 }
 
 run_decomposer() {
-  run "${DECOMPOSER_PATH}" "$@"
+  run "${TEST_DECOMPOSER_PATH}" "$@"
 }
 
 create_decomposer_json() {
