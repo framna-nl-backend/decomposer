@@ -6,14 +6,13 @@ SCRIPT_NAME=${0##*/}
 
 usage() {
 cat << EOF
-usage: ${SCRIPT_NAME} <command> [<library>...]
+usage: ${SCRIPT_NAME} <command>
 
 Manage a PHP project libraries
 Rely on decomposer.json file in working directory
 
 Commands:
-  install    install the libraries
-             only the specified ones if any, all otherwise
+  install    install all the libraries
              and generate an include file
   develop    same as install
              add an extra check to error out if include file is outdated
@@ -30,11 +29,6 @@ error() {
 decomposer_install() {
 PACKAGE=$1
 FILE=$2
-
-if ! [ $(jq ".|has(\"$PACKAGE\")" "$FILE") = "true" ]; then
-  echo "Package '$PACKAGE' not found!"
-  return
-fi
 
 URL=$(jq -r ".\"$PACKAGE\".url" "$FILE")
 VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
@@ -193,7 +187,6 @@ echo -e "\n?>" >> $AUTOLOAD
 }
 
 COMMAND="$1"
-SELECTIVE="${@:2}"
 
 case "$COMMAND" in
   'install')
@@ -201,38 +194,18 @@ case "$COMMAND" in
       error "No decomposer.json found."
     fi
 
-    if [ -z "$SELECTIVE" ]; then
-      INSTALLED_PACKAGES=""
-      decomposer_process_file "$CWD/decomposer.json"
-
-      decomposer_create_autoload "$CWD/decomposer.json"
-    else
-      for PACKAGE in $SELECTIVE; do
-        if [ $(jq ".|has(\"$PACKAGE\")" "$CWD/decomposer.json") = "true" ]; then
-          decomposer_install $PACKAGE "$CWD/decomposer.json"
-          break
-        fi
-      done
-    fi
+    INSTALLED_PACKAGES=""
+    decomposer_process_file "$CWD/decomposer.json"
+    decomposer_create_autoload "$CWD/decomposer.json"
     ;;
   'develop')
     if ! [ -f "$CWD/decomposer.json" ]; then
       error "No decomposer.json found."
     fi
 
-    if [ -z "$SELECTIVE" ]; then
-      INSTALLED_PACKAGES=""
-      decomposer_process_file "$CWD/decomposer.json"
-
-      decomposer_create_autoload "$CWD/decomposer.json" "develop"
-    else
-      for PACKAGE in $SELECTIVE; do
-        if [ $(jq ".|has(\"$PACKAGE\")" "$CWD/decomposer.json") = "true" ]; then
-          decomposer_install $PACKAGE "$CWD/decomposer.json"
-          break
-        fi
-      done
-    fi
+    INSTALLED_PACKAGES=""
+    decomposer_process_file "$CWD/decomposer.json"
+    decomposer_create_autoload "$CWD/decomposer.json" "develop"
     ;;
   'help')
     usage
