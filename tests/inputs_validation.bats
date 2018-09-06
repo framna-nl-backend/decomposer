@@ -1,5 +1,7 @@
 load helpers
 
+# This suite tests the validation of inputs
+
 SUITE_NAME=$( test_suite_name )
 
 @test "${SUITE_NAME}: missing command" {

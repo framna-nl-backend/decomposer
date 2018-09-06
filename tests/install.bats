@@ -1,5 +1,7 @@
 load helpers
 
+# This suite tests the "install" command
+
 SUITE_NAME=$( test_suite_name )
 
 @test "${SUITE_NAME}: single new PSR4 lib" {
