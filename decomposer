@@ -21,8 +21,8 @@ EOF
 }
 
 error() {
-  [[ -z "$1" ]] || printf "${SCRIPT_NAME}: $1\n" >&2
-  printf "Try '${SCRIPT_NAME} help' for more information.\n"
+  [[ -z "$1" ]] || printf '%s: %s\n' "${SCRIPT_NAME}" "$1" >&2
+  printf "Try '%s help' for more information.\\n" "${SCRIPT_NAME}"
   exit 1
 }
 
@@ -34,7 +34,7 @@ decomposer_install() {
   local version=$(jq -r ".\"${package}\".version" "${file}")
   local sub_dir=$(jq -r ".\"${package}\".\"target-dir\"" "${file}")
 
-  printf "Installing ${package}..."
+  printf 'Installing %s...' "${package}"
 
   cd "${TARGET_DIR}"
 
@@ -46,7 +46,7 @@ decomposer_install() {
     fi
 
     if ! [ "$?" = 0 ]; then
-      printf "Cloning git repository for '${package}' failed!\n"
+      printf "Cloning git repository for '%s' failed!\\n" "${package}"
       return
     fi
   fi
@@ -91,7 +91,7 @@ decomposer_install() {
             git reset --hard "v${revision}" &> /dev/null
           fi
         else
-          printf "Revision ${revision} not found.\n"
+          printf 'Revision %s not found.\n' "${revision}"
           return
         fi
       fi
@@ -174,7 +174,7 @@ EOF
   for package in ${packages}; do
     local version=$(jq -r ".\"${package}\".version" "${file}")
 
-    printf "require_once '${package}-${version}.php';\n" >> "${autoload}"
+    printf "require_once '%s-%s.php';\\n" "${package}" "${version}" >> "${autoload}"
   done
 
   printf '\n?>\n' >> "${autoload}"
