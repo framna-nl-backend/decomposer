@@ -26,6 +26,7 @@ EOF
 
   run_decomposer install
   [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Library_1...done" ]
 
   assert_lib_folder Library_1-1.0 "${lib1_revision_hash}"
 
@@ -73,6 +74,7 @@ EOF
 
   run_decomposer install
   [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Library_1...done" ]
 
   assert_lib_folder Library_1-1.0 "${lib1_revision_hash}"
 
