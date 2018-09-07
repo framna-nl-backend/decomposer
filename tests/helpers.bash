@@ -40,15 +40,15 @@ md5checksum_decomposer_json() {
 test_suite_name() {
   local test_file="${BATS_TEST_FILENAME##*/}"
   local test_filename="${test_file%.*}"
-  local suite_name=$( echo "${test_filename}" | tr _ ' ' )
+  local suite_name=$( printf "${test_filename}" | tr _ ' ' )
 
-  echo "${suite_name}"
+  printf "${suite_name}"
 }
 
 create_decomposer_json() {
   local content="$1"
 
-  echo "${content}" > "${TEST_WORKING_DIR}/decomposer.json"
+  printf "${content}" > "${TEST_WORKING_DIR}/decomposer.json"
 }
 
 create_repository() {
@@ -65,7 +65,7 @@ create_repository() {
       rev-parse HEAD
   )
 
-  echo "${revision_hash}"
+  printf "${revision_hash}"
 }
 
 assert_lib_folder() {

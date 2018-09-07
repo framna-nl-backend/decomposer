@@ -21,8 +21,8 @@ EOF
 }
 
 error() {
-  [[ -z "$1" ]] || echo "${SCRIPT_NAME}: $1" >&2
-  echo "Try '${SCRIPT_NAME} help' for more information."
+  [[ -z "$1" ]] || printf "${SCRIPT_NAME}: $1\n" >&2
+  printf "Try '${SCRIPT_NAME} help' for more information.\n"
   exit 1
 }
 
@@ -34,7 +34,7 @@ URL=$(jq -r ".\"$PACKAGE\".url" "$FILE")
 VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
 SUB_DIR=$(jq -r ".\"$PACKAGE\".\"target-dir\"" "$FILE")
 
-echo -n "Installing $PACKAGE..."
+printf "Installing $PACKAGE..."
 
 cd "$TARGET_DIR"
 
@@ -46,7 +46,7 @@ if ! [ -d "$PACKAGE-$VERSION" ]; then
   fi
 
   if ! [ "$?" = 0 ]; then
-    echo "Cloning git repository for '$PACKAGE' failed!"
+    printf "Cloning git repository for '$PACKAGE' failed!\n"
     return
   fi
 fi
@@ -91,32 +91,40 @@ if ! [ -h "$PACKAGE-$VERSION" ]; then
           git reset --hard "v$REVISION" &> /dev/null
         fi
       else
-        echo "Revision $REVISION not found"
+        printf "Revision $REVISION not found.\n"
         return
       fi
     fi
   cd $TARGET_DIR
 fi
 
-echo -e "<?php\n" > "$PACKAGE-$VERSION.php"
-
 if [ $(jq ".\"$PACKAGE\"|has(\"psr0\")" "$FILE") = "true" ]; then
   PSR0_PATH=$(jq -r ".\"$PACKAGE\".psr0.path" "$FILE")
 
-  echo "set_include_path(" >> "$PACKAGE-$VERSION.php"
-  echo "    get_include_path() . ':' ." >> "$PACKAGE-$VERSION.php"
-  echo "    __DIR__ . '/${PACKAGE}-${VERSION}${PSR0_PATH}'" >> "$PACKAGE-$VERSION.php"
-  echo -e ");\n" >> "$PACKAGE-$VERSION.php"
+  cat << EOF > "$PACKAGE-$VERSION.php"
+<?php
+
+set_include_path(
+    get_include_path() . ':' .
+    __DIR__ . '/${PACKAGE}-${VERSION}${PSR0_PATH}'
+);
+
+?>
+EOF
 elif [ $(jq ".\"$PACKAGE\"|has(\"psr4\")" "$FILE") = "true" ]; then
   PSR4_PREFIX=$(jq -r ".\"$PACKAGE\".psr4.prefix" "$FILE")
   PSR4_PATH=$(jq -r ".\"$PACKAGE\".psr4.\"search-path\"" "$FILE")
 
-  echo -e "autoload_register_psr4_prefix('$PSR4_PREFIX', '${PACKAGE}-${VERSION}${PSR4_PATH}');\n" >> "$PACKAGE-$VERSION.php"
+  cat << EOF > "$PACKAGE-$VERSION.php"
+<?php
+
+autoload_register_psr4_prefix('$PSR4_PREFIX', '${PACKAGE}-${VERSION}${PSR4_PATH}');
+
+?>
+EOF
 fi
 
-echo "?>" >> "$PACKAGE-$VERSION.php"
-
-echo "done"
+printf "done\n"
 }
 
 decomposer_process_file() {
@@ -147,23 +155,28 @@ DEVELOP=$2
 PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
 AUTOLOAD="$CWD/decomposer.autoload.inc.php"
 
-echo -e "<?php\n" > $AUTOLOAD
+printf "<?php\n\n" > $AUTOLOAD
 
 if [ "$DEVELOP" = "develop" ]; then
   MD5=$(md5checksum "$CWD/decomposer.json")
 
-  echo -e "if (md5_file(__DIR__ . '/decomposer.json') != '$MD5')\n{" >> $AUTOLOAD
-  echo -e "    die(\"Decomposer autoload file is outdated. Please re-run 'decomposer develop'\n\");" >> $AUTOLOAD
-  echo -e "}\n" >> $AUTOLOAD
+  cat << EOF >> $AUTOLOAD
+if (md5_file(__DIR__ . '/decomposer.json') != '$MD5')
+{
+    die("Decomposer autoload file is outdated. Please re-run 'decomposer develop'
+");
+}
+
+EOF
 fi
 
 for PACKAGE in $PACKAGES; do
   VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
 
-  echo "require_once '$PACKAGE-$VERSION.php';" >> $AUTOLOAD
+  printf "require_once '$PACKAGE-$VERSION.php';\n" >> $AUTOLOAD
 done
 
-echo -e "\n?>" >> $AUTOLOAD
+printf "\n?>\n" >> $AUTOLOAD
 
 }
 
