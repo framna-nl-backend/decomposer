@@ -24,6 +24,19 @@ run_decomposer() {
   run "${TEST_DECOMPOSER_PATH}" "$@"
 }
 
+md5checksum_decomposer_json() {
+  local file="${TEST_WORKING_DIR}/decomposer.json"
+
+  case "$( uname )" in
+    'Linux')
+      md5sum "${file}" | cut -f1 -d' '
+      ;;
+    'Darwin')
+      md5 -q "${file}"
+      ;;
+  esac
+}
+
 test_suite_name() {
   local test_file="${BATS_TEST_FILENAME##*/}"
   local test_filename="${test_file%.*}"
