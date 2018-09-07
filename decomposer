@@ -27,98 +27,98 @@ error() {
 }
 
 decomposer_install() {
-  PACKAGE=$1
-  FILE=$2
+  local package=$1
+  local file=$2
 
-  URL=$(jq -r ".\"$PACKAGE\".url" "$FILE")
-  VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
-  SUB_DIR=$(jq -r ".\"$PACKAGE\".\"target-dir\"" "$FILE")
+  local url=$(jq -r ".\"$package\".url" "$file")
+  local version=$(jq -r ".\"$package\".version" "$file")
+  local sub_dir=$(jq -r ".\"$package\".\"target-dir\"" "$file")
 
-  printf "Installing $PACKAGE..."
+  printf "Installing $package..."
 
   cd "$TARGET_DIR"
 
-  if ! [ -d "$PACKAGE-$VERSION" ]; then
-    if [ "$SUB_DIR" == "null" ]; then
-      git clone "$URL" "$PACKAGE-$VERSION" &> /dev/null
+  if ! [ -d "$package-$version" ]; then
+    if [ "$sub_dir" == "null" ]; then
+      git clone "$url" "$package-$version" &> /dev/null
     else
-      git clone "$URL" "$PACKAGE-$VERSION$SUB_DIR" &> /dev/null
+      git clone "$url" "$package-$version$sub_dir" &> /dev/null
     fi
 
     if ! [ "$?" = 0 ]; then
-      printf "Cloning git repository for '$PACKAGE' failed!\n"
+      printf "Cloning git repository for '$package' failed!\n"
       return
     fi
   fi
 
-  if ! [ -h "$PACKAGE-$VERSION" ]; then
-    if [ "$SUB_DIR" == "null" ]; then
-      cd "$PACKAGE-$VERSION"
+  if ! [ -h "$package-$version" ]; then
+    if [ "$sub_dir" == "null" ]; then
+      cd "$package-$version"
     else
-      cd "$PACKAGE-$VERSION$SUB_DIR"
+      cd "$package-$version$sub_dir"
     fi
       if ! [ -f ".git" ]; then
-        if [ $(jq ".\"$PACKAGE\"|has(\"revision\")" "$FILE") = "true" ]; then
-          REVISION=$(jq -r ".\"$PACKAGE\".revision" "$FILE")
+        if [ $(jq ".\"$package\"|has(\"revision\")" "$file") = "true" ]; then
+          local revision=$(jq -r ".\"$package\".revision" "$file")
         else
-          REVISION=$VERSION
+          local revision=$version
         fi
 
         git fetch origin &> /dev/null
 
-        REV_ORIGIN=$(git branch -a | grep /origin/$REVISION)
+        local rev_origin=$(git branch -a | grep /origin/$revision)
 
-        if [ -z $REV_ORIGIN ]; then
-          GIT_TYPE=$(git cat-file -t "$REVISION" 2> /dev/null)
-          GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
+        if [ -z $rev_origin ]; then
+          local git_type=$(git cat-file -t "$revision" 2> /dev/null)
+          local git_alt_type=$(git cat-file -t "v$revision" 2> /dev/null)
         else
-          GIT_TYPE=$(git cat-file -t "origin/$REVISION" 2> /dev/null)
-          GIT_ALT_TYPE=$(git cat-file -t "v$REVISION" 2> /dev/null)
+          local git_type=$(git cat-file -t "origin/$revision" 2> /dev/null)
+          local git_alt_type=$(git cat-file -t "v$revision" 2> /dev/null)
         fi
 
-        REV_HEAD=$(git rev-parse HEAD)
+        local rev_head=$(git rev-parse HEAD)
 
-        if [ "$GIT_TYPE" = "commit" -o "$GIT_TYPE" = "tag" ]; then
-          if ! [ -z $REV_ORIGIN ]; then
-            if ! [ "$REV_HEAD" = "$(git rev-parse origin/$REVISION)" ]; then
-              git reset --hard "origin/$REVISION" &> /dev/null
+        if [ "$git_type" = "commit" -o "$git_type" = "tag" ]; then
+          if ! [ -z $rev_origin ]; then
+            if ! [ "$rev_head" = "$(git rev-parse origin/$revision)" ]; then
+              git reset --hard "origin/$revision" &> /dev/null
             fi
-          elif ! [ "$REV_HEAD" = "$(git rev-parse $REVISION)" ]; then
-            git reset --hard "$REVISION" &> /dev/null
+          elif ! [ "$rev_head" = "$(git rev-parse $revision)" ]; then
+            git reset --hard "$revision" &> /dev/null
           fi
-        elif [ "$GIT_ALT_TYPE" = "commit" -o "$GIT_ALT_TYPE" = "tag" ]; then
-          if ! [ "$REV_HEAD" = "$(git rev-parse "v$REVISION")" ]; then
-            git reset --hard "v$REVISION" &> /dev/null
+        elif [ "$git_alt_type" = "commit" -o "$git_alt_type" = "tag" ]; then
+          if ! [ "$rev_head" = "$(git rev-parse "v$revision")" ]; then
+            git reset --hard "v$revision" &> /dev/null
           fi
         else
-          printf "Revision $REVISION not found.\n"
+          printf "Revision $revision not found.\n"
           return
         fi
       fi
     cd $TARGET_DIR
   fi
 
-  if [ $(jq ".\"$PACKAGE\"|has(\"psr0\")" "$FILE") = "true" ]; then
-    PSR0_PATH=$(jq -r ".\"$PACKAGE\".psr0.path" "$FILE")
+  if [ $(jq ".\"$package\"|has(\"psr0\")" "$file") = "true" ]; then
+    local psr0_path=$(jq -r ".\"$package\".psr0.path" "$file")
 
-    cat << EOF > "$PACKAGE-$VERSION.php"
+    cat << EOF > "$package-$version.php"
 <?php
 
 set_include_path(
     get_include_path() . ':' .
-    __DIR__ . '/${PACKAGE}-${VERSION}${PSR0_PATH}'
+    __DIR__ . '/${package}-${version}${psr0_path}'
 );
 
 ?>
 EOF
-  elif [ $(jq ".\"$PACKAGE\"|has(\"psr4\")" "$FILE") = "true" ]; then
-    PSR4_PREFIX=$(jq -r ".\"$PACKAGE\".psr4.prefix" "$FILE")
-    PSR4_PATH=$(jq -r ".\"$PACKAGE\".psr4.\"search-path\"" "$FILE")
+  elif [ $(jq ".\"$package\"|has(\"psr4\")" "$file") = "true" ]; then
+    local psr4_prefix=$(jq -r ".\"$package\".psr4.prefix" "$file")
+    local psr4_path=$(jq -r ".\"$package\".psr4.\"search-path\"" "$file")
 
-    cat << EOF > "$PACKAGE-$VERSION.php"
+    cat << EOF > "$package-$version.php"
 <?php
 
-autoload_register_psr4_prefix('$PSR4_PREFIX', '${PACKAGE}-${VERSION}${PSR4_PATH}');
+autoload_register_psr4_prefix('$psr4_prefix', '${package}-${version}${psr4_path}');
 
 ?>
 EOF
@@ -128,11 +128,11 @@ EOF
 }
 
 decomposer_process_file() {
-  FILE=$1
-  PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
+  local file=$1
+  local packages=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$file")
 
-  for package in $PACKAGES; do
-    decomposer_install $package "$FILE"
+  for package in $packages; do
+    decomposer_install $package "$file"
   done
 }
 
@@ -150,18 +150,18 @@ md5checksum() {
 }
 
 decomposer_create_autoload() {
-  FILE=$1
-  DEVELOP=$2
-  PACKAGES=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$FILE")
-  AUTOLOAD="$CWD/decomposer.autoload.inc.php"
+  local file=$1
+  local develop=$2
+  local packages=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$file")
+  local autoload="$CWD/decomposer.autoload.inc.php"
 
-  printf "<?php\n\n" > $AUTOLOAD
+  printf "<?php\n\n" > $autoload
 
-  if [ "$DEVELOP" = "develop" ]; then
-    MD5=$(md5checksum "$CWD/decomposer.json")
+  if [ "$develop" = "develop" ]; then
+    local md5=$(md5checksum "$CWD/decomposer.json")
 
-    cat << EOF >> $AUTOLOAD
-if (md5_file(__DIR__ . '/decomposer.json') != '$MD5')
+    cat << EOF >> $autoload
+if (md5_file(__DIR__ . '/decomposer.json') != '$md5')
 {
     die("Decomposer autoload file is outdated. Please re-run 'decomposer develop'
 ");
@@ -170,13 +170,13 @@ if (md5_file(__DIR__ . '/decomposer.json') != '$MD5')
 EOF
   fi
 
-  for PACKAGE in $PACKAGES; do
-    VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
+  for package in $packages; do
+    local version=$(jq -r ".\"$package\".version" "$file")
 
-    printf "require_once '$PACKAGE-$VERSION.php';\n" >> $AUTOLOAD
+    printf "require_once '$package-$version.php';\n" >> $autoload
   done
 
-  printf "\n?>\n" >> $AUTOLOAD
+  printf "\n?>\n" >> $autoload
 }
 
 COMMAND="$1"
