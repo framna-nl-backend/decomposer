@@ -33,11 +33,6 @@ FILE=$2
 URL=$(jq -r ".\"$PACKAGE\".url" "$FILE")
 VERSION=$(jq -r ".\"$PACKAGE\".version" "$FILE")
 SUB_DIR=$(jq -r ".\"$PACKAGE\".\"target-dir\"" "$FILE")
-for INSTALLED in $INSTALLED_PACKAGES; do
-  if [ "$INSTALLED" = "$PACKAGE-$VERSION" ]; then
-    return
-  fi
-done
 
 echo -n "Installing $PACKAGE..."
 
@@ -134,8 +129,6 @@ fi
 echo "?>" >> "$PACKAGE-$VERSION.php"
 
 echo "done"
-
-INSTALLED_PACKAGES+="$PACKAGE-$VERSION "
 }
 
 decomposer_process_file() {
@@ -194,7 +187,6 @@ case "$COMMAND" in
       error "No decomposer.json found."
     fi
 
-    INSTALLED_PACKAGES=""
     decomposer_process_file "$CWD/decomposer.json"
     decomposer_create_autoload "$CWD/decomposer.json"
     ;;
@@ -203,7 +195,6 @@ case "$COMMAND" in
       error "No decomposer.json found."
     fi
 
-    INSTALLED_PACKAGES=""
     decomposer_process_file "$CWD/decomposer.json"
     decomposer_create_autoload "$CWD/decomposer.json" "develop"
     ;;
