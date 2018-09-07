@@ -109,16 +109,6 @@ if [ $(jq ".\"$PACKAGE\"|has(\"psr0\")" "$FILE") = "true" ]; then
   echo -e ");\n" >> "$PACKAGE-$VERSION.php"
 fi
 
-if [ $(jq ".\"$PACKAGE\"|has(\"includes\")" "$FILE") = "true" ]; then
-  INCLUDES=$(jq -r ".\"$PACKAGE\".includes|to_entries|map(\"\(.value|tostring)\")|.[]" "$FILE")
-
-  for i in $INCLUDES; do
-    echo -e "include_once '$i.php';" >> "$PACKAGE-$VERSION.php"
-  done
-
-  echo "" >> "$PACKAGE-$VERSION.php"
-fi
-
 if [ $(jq ".\"$PACKAGE\"|has(\"psr4\")" "$FILE") = "true" ]; then
   PSR4_PREFIX=$(jq -r ".\"$PACKAGE\".psr4.prefix" "$FILE")
   PSR4_PATH=$(jq -r ".\"$PACKAGE\".psr4.\"search-path\"" "$FILE")
