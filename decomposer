@@ -30,78 +30,79 @@ decomposer_install() {
   local package=$1
   local file=$2
 
-  local url=$(jq -r ".\"$package\".url" "$file")
-  local version=$(jq -r ".\"$package\".version" "$file")
-  local sub_dir=$(jq -r ".\"$package\".\"target-dir\"" "$file")
+  local url=$(jq -r ".\"${package}\".url" "${file}")
+  local version=$(jq -r ".\"${package}\".version" "${file}")
+  local sub_dir=$(jq -r ".\"${package}\".\"target-dir\"" "${file}")
 
-  printf "Installing $package..."
+  printf "Installing ${package}..."
 
-  cd "$TARGET_DIR"
+  cd "${TARGET_DIR}"
 
-  if ! [ -d "$package-$version" ]; then
-    if [ "$sub_dir" == "null" ]; then
-      git clone "$url" "$package-$version" &> /dev/null
+  if ! [ -d "${package}-${version}" ]; then
+    if [ "${sub_dir}" == 'null' ]; then
+      git clone "${url}" "${package}-${version}" &> /dev/null
     else
-      git clone "$url" "$package-$version$sub_dir" &> /dev/null
+      git clone "${url}" "${package}-${version}${sub_dir}" &> /dev/null
     fi
 
     if ! [ "$?" = 0 ]; then
-      printf "Cloning git repository for '$package' failed!\n"
+      printf "Cloning git repository for '${package}' failed!\n"
       return
     fi
   fi
 
-  if ! [ -h "$package-$version" ]; then
-    if [ "$sub_dir" == "null" ]; then
-      cd "$package-$version"
+  if ! [ -h "${package}-${version}" ]; then
+    if [ "${sub_dir}" == 'null' ]; then
+      cd "${package}-${version}"
     else
-      cd "$package-$version$sub_dir"
+      cd "${package}-${version}${sub_dir}"
     fi
-      if ! [ -f ".git" ]; then
-        if [ $(jq ".\"$package\"|has(\"revision\")" "$file") = "true" ]; then
-          local revision=$(jq -r ".\"$package\".revision" "$file")
+      if ! [ -f '.git' ]; then
+        if [ "$(jq ".\"${package}\"|has(\"revision\")" "${file}")" = 'true' ]; then
+          local revision=$(jq -r ".\"${package}\".revision" "${file}")
         else
-          local revision=$version
+          local revision="${version}"
         fi
 
         git fetch origin &> /dev/null
 
-        local rev_origin=$(git branch -a | grep /origin/$revision)
+        local rev_origin=$(git branch -a | grep "/origin/${revision}")
 
-        if [ -z $rev_origin ]; then
-          local git_type=$(git cat-file -t "$revision" 2> /dev/null)
-          local git_alt_type=$(git cat-file -t "v$revision" 2> /dev/null)
+        if [ -z "${rev_origin}" ]; then
+          local git_type=$(git cat-file -t "${revision}" 2> /dev/null)
+          local git_alt_type=$(git cat-file -t "v${revision}" 2> /dev/null)
         else
-          local git_type=$(git cat-file -t "origin/$revision" 2> /dev/null)
-          local git_alt_type=$(git cat-file -t "v$revision" 2> /dev/null)
+          local git_type=$(git cat-file -t "origin/${revision}" 2> /dev/null)
+          local git_alt_type=$(git cat-file -t "v${revision}" 2> /dev/null)
         fi
 
         local rev_head=$(git rev-parse HEAD)
 
-        if [ "$git_type" = "commit" -o "$git_type" = "tag" ]; then
-          if ! [ -z $rev_origin ]; then
-            if ! [ "$rev_head" = "$(git rev-parse origin/$revision)" ]; then
-              git reset --hard "origin/$revision" &> /dev/null
+        if [ "${git_type}" = 'commit' -o "${git_type}" = 'tag' ]; then
+          if ! [ -z "${rev_origin}" ]; then
+            if ! [ "${rev_head}" = "$(git rev-parse "origin/${revision}")" ]; then
+              git reset --hard "origin/${revision}" &> /dev/null
             fi
-          elif ! [ "$rev_head" = "$(git rev-parse $revision)" ]; then
-            git reset --hard "$revision" &> /dev/null
+          elif ! [ "$rev_head" = "$(git rev-parse "${revision}")" ]; then
+            git reset --hard "${revision}" &> /dev/null
           fi
-        elif [ "$git_alt_type" = "commit" -o "$git_alt_type" = "tag" ]; then
-          if ! [ "$rev_head" = "$(git rev-parse "v$revision")" ]; then
-            git reset --hard "v$revision" &> /dev/null
+        elif [ "${git_alt_type}" = 'commit' -o "${git_alt_type}" = 'tag' ]; then
+          if ! [ "${rev_head}" = "$(git rev-parse "v${revision}")" ]; then
+            git reset --hard "v${revision}" &> /dev/null
           fi
         else
-          printf "Revision $revision not found.\n"
+          printf "Revision ${revision} not found.\n"
           return
         fi
       fi
-    cd $TARGET_DIR
+
+    cd "${TARGET_DIR}"
   fi
 
-  if [ $(jq ".\"$package\"|has(\"psr0\")" "$file") = "true" ]; then
-    local psr0_path=$(jq -r ".\"$package\".psr0.path" "$file")
+  if [ "$(jq ".\"${package}\"|has(\"psr0\")" "${file}")" = 'true' ]; then
+    local psr0_path=$(jq -r ".\"${package}\".psr0.path" "${file}")
 
-    cat << EOF > "$package-$version.php"
+    cat << EOF > "${package}-${version}.php"
 <?php
 
 set_include_path(
@@ -111,28 +112,28 @@ set_include_path(
 
 ?>
 EOF
-  elif [ $(jq ".\"$package\"|has(\"psr4\")" "$file") = "true" ]; then
-    local psr4_prefix=$(jq -r ".\"$package\".psr4.prefix" "$file")
-    local psr4_path=$(jq -r ".\"$package\".psr4.\"search-path\"" "$file")
+  elif [ "$(jq ".\"${package}\"|has(\"psr4\")" "${file}")" = 'true' ]; then
+    local psr4_prefix=$(jq -r ".\"${package}\".psr4.prefix" "${file}")
+    local psr4_path=$(jq -r ".\"${package}\".psr4.\"search-path\"" "${file}")
 
-    cat << EOF > "$package-$version.php"
+    cat << EOF > "${package}-${version}.php"
 <?php
 
-autoload_register_psr4_prefix('$psr4_prefix', '${package}-${version}${psr4_path}');
+autoload_register_psr4_prefix('${psr4_prefix}', '${package}-${version}${psr4_path}');
 
 ?>
 EOF
   fi
 
-  printf "done\n"
+  printf 'done\n'
 }
 
 decomposer_process_file() {
   local file=$1
-  local packages=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$file")
+  local packages=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}")
 
-  for package in $packages; do
-    decomposer_install $package "$file"
+  for package in ${packages}; do
+    decomposer_install "${package}" "${file}"
   done
 }
 
@@ -152,16 +153,16 @@ md5checksum() {
 decomposer_create_autoload() {
   local file=$1
   local develop=$2
-  local packages=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "$file")
-  local autoload="$CWD/decomposer.autoload.inc.php"
+  local packages=$(jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}")
+  local autoload="${CWD}/decomposer.autoload.inc.php"
 
-  printf "<?php\n\n" > $autoload
+  printf '<?php\n\n' > "${autoload}"
 
-  if [ "$develop" = "develop" ]; then
-    local md5=$(md5checksum "$CWD/decomposer.json")
+  if [ "${develop}" = 'develop' ]; then
+    local md5=$(md5checksum "${CWD}/decomposer.json")
 
-    cat << EOF >> $autoload
-if (md5_file(__DIR__ . '/decomposer.json') != '$md5')
+    cat << EOF >> "${autoload}"
+if (md5_file(__DIR__ . '/decomposer.json') != '${md5}')
 {
     die("Decomposer autoload file is outdated. Please re-run 'decomposer develop'
 ");
@@ -170,41 +171,41 @@ if (md5_file(__DIR__ . '/decomposer.json') != '$md5')
 EOF
   fi
 
-  for package in $packages; do
-    local version=$(jq -r ".\"$package\".version" "$file")
+  for package in ${packages}; do
+    local version=$(jq -r ".\"${package}\".version" "${file}")
 
-    printf "require_once '$package-$version.php';\n" >> $autoload
+    printf "require_once '${package}-${version}.php';\n" >> "${autoload}"
   done
 
-  printf "\n?>\n" >> $autoload
+  printf '\n?>\n' >> "${autoload}"
 }
 
 COMMAND="$1"
 
-case "$COMMAND" in
+case "${COMMAND}" in
   'install')
-    if ! [ -f "$CWD/decomposer.json" ]; then
-      error "No decomposer.json found."
+    if ! [ -f "${CWD}/decomposer.json" ]; then
+      error 'No decomposer.json found.'
     fi
 
-    decomposer_process_file "$CWD/decomposer.json"
-    decomposer_create_autoload "$CWD/decomposer.json"
+    decomposer_process_file "${CWD}/decomposer.json"
+    decomposer_create_autoload "${CWD}/decomposer.json"
     ;;
   'develop')
-    if ! [ -f "$CWD/decomposer.json" ]; then
-      error "No decomposer.json found."
+    if ! [ -f "${CWD}/decomposer.json" ]; then
+      error 'No decomposer.json found.'
     fi
 
-    decomposer_process_file "$CWD/decomposer.json"
-    decomposer_create_autoload "$CWD/decomposer.json" "develop"
+    decomposer_process_file "${CWD}/decomposer.json"
+    decomposer_create_autoload "${CWD}/decomposer.json" 'develop'
     ;;
   'help')
     usage
     exit
     ;;
   '')
-    error "Missing command!"
+    error 'Missing command!'
     ;;
   *)
-    error "Invalid command!"
+    error 'Invalid command!'
 esac
