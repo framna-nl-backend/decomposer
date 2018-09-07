@@ -21,10 +21,10 @@ EOF
 }
 
 error() {
-  [[ -z "$1" ]] || printf '%s: %s\n' "${SCRIPT_NAME}" "$1" >&2
+  [[ -z "$1" ]] || printf '%s: %s\n' "${SCRIPT_NAME}" "$1"
   printf "Try '%s help' for more information.\\n" "${SCRIPT_NAME}"
   exit 1
-}
+} >&2
 
 decomposer_install() {
   local package=$1
