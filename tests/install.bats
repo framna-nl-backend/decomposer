@@ -8,13 +8,13 @@ SUITE_NAME=$( test_suite_name )
   local decomposer_json=$(
 cat << EOF
 {
-    "Library_1": {
-        "url": "${TEST_REPOS_DIR}/lib1",
+    "Alpha": {
+        "url": "${TEST_REPOS_DIR}/alpha-lib",
         "revision": "master",
         "version": "1.0",
         "psr4": {
-            "prefix": "lib1",
-            "search-path": "/src/Lib1/"
+            "prefix": "alpha-lib",
+            "search-path": "/src/alpha/"
          }
      }
 }
@@ -22,30 +22,30 @@ EOF
 )
   create_decomposer_json "${decomposer_json}"
 
-  local lib1_revision_hash="$( create_repository lib1 )"
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Library_1...done" ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_lib_folder Library_1-1.0 "${lib1_revision_hash}"
+  assert_lib_folder Alpha-1.0 "${alpha_lib_revision_hash}"
 
-  local expected_lib1_file=$(
+  local expected_alpha_lib_file=$(
 cat << EOF
 <?php
 
-autoload_register_psr4_prefix('lib1', 'Library_1-1.0/src/Lib1/');
+autoload_register_psr4_prefix('alpha-lib', 'Alpha-1.0/src/alpha/');
 
 ?>
 EOF
 )
-  assert_lib_file Library_1-1.0 "${expected_lib1_file}"
+  assert_lib_file Alpha-1.0 "${expected_alpha_lib_file}"
 
   local expected_autoload_file=$(
 cat << EOF
 <?php
 
-require_once 'Library_1-1.0.php';
+require_once 'Alpha-1.0.php';
 
 ?>
 EOF
@@ -57,12 +57,12 @@ EOF
   local decomposer_json=$(
 cat << EOF
 {
-    "Library_1": {
-        "url": "${TEST_REPOS_DIR}/lib1",
+    "Alpha": {
+        "url": "${TEST_REPOS_DIR}/alpha-lib",
         "revision": "master",
         "version": "1.0",
         "psr0": {
-            "path": "/src/Lib1/"
+            "path": "/src/alpha/"
          }
      }
 }
@@ -70,33 +70,33 @@ EOF
 )
   create_decomposer_json "${decomposer_json}"
 
-  local lib1_revision_hash="$( create_repository lib1 )"
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Library_1...done" ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_lib_folder Library_1-1.0 "${lib1_revision_hash}"
+  assert_lib_folder Alpha-1.0 "${alpha_lib_revision_hash}"
 
-  local expected_lib1_file=$(
+  local expected_alpha_lib_file=$(
 cat << EOF
 <?php
 
 set_include_path(
     get_include_path() . ':' .
-    __DIR__ . '/Library_1-1.0/src/Lib1/'
+    __DIR__ . '/Alpha-1.0/src/alpha/'
 );
 
 ?>
 EOF
 )
-  assert_lib_file Library_1-1.0 "${expected_lib1_file}"
+  assert_lib_file Alpha-1.0 "${expected_alpha_lib_file}"
 
   local expected_autoload_file=$(
 cat << EOF
 <?php
 
-require_once 'Library_1-1.0.php';
+require_once 'Alpha-1.0.php';
 
 ?>
 EOF
