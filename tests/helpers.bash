@@ -1,10 +1,13 @@
-# environment variables used by decomposer internally
-export TARGET_DIR="${BATS_TMPDIR}/decomposer/libs"
+# custom temporary test directory to prevent conflicts
+export TEST_TMP_DIR="${BATS_TMPDIR}/decomposer"
 
 # environment variables used by the tests only
-export TEST_WORKING_DIR="${BATS_TMPDIR}/decomposer/working_dir"
-export TEST_REPOS_DIR="${BATS_TMPDIR}/decomposer/repositories"
+export TEST_WORKING_DIR="${TEST_TMP_DIR}/working_dir"
+export TEST_REPOS_DIR="${TEST_TMP_DIR}/repositories"
 export TEST_DECOMPOSER_PATH="${BATS_TEST_DIRNAME}/../decomposer"
+
+# environment variables used by decomposer internally
+export TARGET_DIR="${TEST_TMP_DIR}/libs"
 
 setup() {
   mkdir -p "${TARGET_DIR}"
@@ -15,9 +18,7 @@ setup() {
 }
 
 teardown() {
-  rm -rf "${TARGET_DIR}"
-  rm -rf "${TEST_WORKING_DIR}"
-  rm -rf "${TEST_REPOS_DIR}"
+  rm -rf "${TEST_TMP_DIR}"
 }
 
 run_decomposer() {
