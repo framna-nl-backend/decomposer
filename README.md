@@ -66,6 +66,14 @@ decomposer.json
         "psr0": {
             "path": "/library/"
         }
+    },
+    "Credis": {
+        "url": "https://github.com/colinmollenhour/credis.git",
+        "version": "1.7",
+        "target-dir": "/Credis",
+        "psr0": {
+            "path": "/"
+        }
     }
 }
 ```
@@ -77,6 +85,7 @@ JSON object holding the configuration. The following keys are supporting within 
 * version - The version of the library (This should map a tag with either the same name or in the form of 'v{version}',
             unless revision is specified as well. In that case this is merely used as an identifier)
 * revision - Can be used to install a specific branch/commit
+* target-dir - Can be used to clone the library to a specific subdirectory in order to satisfy autoloading structure
 * psr0 - Autoloader configuration using [PSR-0](https://www.php-fig.org/psr/psr-0/)
 * psr4 - Autoloader configuration using [PSR-4](https://www.php-fig.org/psr/psr-4/)
 
