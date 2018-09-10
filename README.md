@@ -91,7 +91,7 @@ Tests
 
 To run the tests, you also need to have:
 
-* [bats](https://github.com/sstephenson/bats) - Testing framework for Bash
+* [bats-core](https://github.com/bats-core/bats-core) - Testing framework for Bash
 
 Then you can run all the tests with the following command:
 
