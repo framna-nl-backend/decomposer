@@ -48,7 +48,7 @@ decomposer_install() {
     git clone "${url}" "${package_target_dir}" &> /dev/null
 
     if ! [ "$?" = 0 ]; then
-      printf "Cloning git repository for '%s' failed!\\n" "${package}"
+      printf "failed (cloning git repository failed)\\n"
       return
     fi
   fi
@@ -90,7 +90,7 @@ decomposer_install() {
             git reset --hard "v${revision}" &> /dev/null
           fi
         else
-          printf 'Revision %s not found.\n' "${revision}"
+          printf "failed (revision '%s' not found)\\n" "${revision}"
           return
         fi
       fi
@@ -203,8 +203,8 @@ case "${COMMAND}" in
     exit
     ;;
   '')
-    error 'Missing command!'
+    error 'Missing command'
     ;;
   *)
-    error 'Invalid command!'
+    error 'Invalid command'
 esac

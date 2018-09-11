@@ -15,7 +15,7 @@ SUITE_NAME=$( test_suite_name )
   run_decomposer install
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...Cloning git repository for 'Beta' failed!" ]
+  [ "${lines[1]}" = "Installing Beta...failed (cloning git repository failed)" ]
   [ "${lines[2]}" = "Installing Gamma...done" ]
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
@@ -37,7 +37,7 @@ SUITE_NAME=$( test_suite_name )
   run_decomposer install
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...Revision 1.2.3 not found." ]
+  [ "${lines[1]}" = "Installing Beta...failed (revision '1.2.3' not found)" ]
   [ "${lines[2]}" = "Installing Gamma...done" ]
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
@@ -59,7 +59,7 @@ SUITE_NAME=$( test_suite_name )
   run_decomposer install
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...Revision foo not found." ]
+  [ "${lines[1]}" = "Installing Beta...failed (revision 'foo' not found)" ]
   [ "${lines[2]}" = "Installing Gamma...done" ]
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
@@ -81,7 +81,7 @@ SUITE_NAME=$( test_suite_name )
   run_decomposer install
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...Revision 301939ad0133ef not found." ]
+  [ "${lines[1]}" = "Installing Beta...failed (revision '301939ad0133ef' not found)" ]
   [ "${lines[2]}" = "Installing Gamma...done" ]
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
