@@ -5,32 +5,17 @@ load helpers
 SUITE_NAME=$( test_suite_name )
 
 @test "${SUITE_NAME}: already existing library as symlink" {
-  local decomposer_json=$(
-cat << EOF
-{
-    "Alpha": {
-        "url": "${TEST_REPOS_DIR}/alpha-lib",
-        "revision": "master",
-        "version": "1.0",
-        "psr4": {
-            "prefix": "alpha-lib",
-            "search-path": "/src/alpha/"
-         }
-     }
-}
-EOF
-)
-  create_decomposer_json "${decomposer_json}"
+  create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
 
-   # create clone of library
-   git clone "${TEST_REPOS_DIR}/alpha-lib" "${TEST_TMP_DIR}/Alpha"
-   # add some local modifications
-   git -C "${TEST_TMP_DIR}/Alpha" commit \
-     --allow-empty --message 'custom commit'
-   # create symlink in target folder with version
-   ln -s "${TEST_TMP_DIR}/Alpha" "${TARGET_DIR}/Alpha-1.0"
+  # create clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TEST_TMP_DIR}/Alpha"
+  # add some local modifications
+  git -C "${TEST_TMP_DIR}/Alpha" commit \
+    --allow-empty --message 'custom commit'
+  # create symlink in target folder with version
+  ln -s "${TEST_TMP_DIR}/Alpha" "${TARGET_DIR}/Alpha-1.0"
 
   local custom_alpha_lib_revision_hash=$(
     git -C "${TARGET_DIR}/Alpha-1.0" \
@@ -46,22 +31,7 @@ EOF
 }
 
 @test "${SUITE_NAME}: already existing library as git worktree" {
-  local decomposer_json=$(
-cat << EOF
-{
-    "Alpha": {
-        "url": "${TEST_REPOS_DIR}/alpha-lib",
-        "revision": "master",
-        "version": "1.0",
-        "psr4": {
-            "prefix": "alpha-lib",
-            "search-path": "/src/alpha/"
-         }
-     }
-}
-EOF
-)
-  create_decomposer_json "${decomposer_json}"
+  create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
 

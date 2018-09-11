@@ -4,6 +4,7 @@ export TEST_TMP_DIR="${BATS_TMPDIR}/decomposer"
 # environment variables used by the tests only
 export TEST_WORKING_DIR="${TEST_TMP_DIR}/working_dir"
 export TEST_REPOS_DIR="${TEST_TMP_DIR}/repositories"
+export TEST_FIXTURES_DIR="${BATS_TEST_DIRNAME}/fixtures"
 export TEST_DECOMPOSER_PATH="${BATS_TEST_DIRNAME}/../decomposer"
 
 # environment variables used by decomposer internally
@@ -47,9 +48,11 @@ test_suite_name() {
 }
 
 create_decomposer_json() {
-  local content="$1"
+  local fixture_name="$1"
 
-  printf "${content}" > "${TEST_WORKING_DIR}/decomposer.json"
+  eval "cat << EOF
+$(< "${TEST_FIXTURES_DIR}/decomposer_json/${fixture_name}.json" )
+EOF" > "${TEST_WORKING_DIR}/decomposer.json"
 }
 
 create_repository() {
@@ -84,22 +87,64 @@ assert_lib_folder() {
 }
 
 assert_lib_file() {
-  local name="$1"
-  local expected_content="$2"
+  local lib_name_version="$1"
+  local fixture_name="$2"
 
-  [ -f "${TARGET_DIR}/${name}.php" ]
+  [ -f "${TARGET_DIR}/${lib_name_version}.php" ]
+
+  local expected_content=$(
+    cat "${TEST_FIXTURES_DIR}/autoload_lib/${fixture_name}.php"
+  )
 
   local result_content=$(
-    cat "${TARGET_DIR}/${name}.php"
+    cat "${TARGET_DIR}/${lib_name_version}.php"
   )
 
   [ "${expected_content}" == "${result_content}" ]
 }
 
 assert_autoload_file() {
-  local expected_content="$1"
+  local lib_name_version="$1"
 
   [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
+
+  local expected_content=$(
+    cat << EOF
+<?php
+
+require_once '${lib_name_version}.php';
+
+?>
+EOF
+  )
+
+  local result_content=$(
+    cat "${TEST_WORKING_DIR}/decomposer.autoload.inc.php"
+  )
+
+  [ "${expected_content}" == "${result_content}" ]
+}
+
+assert_autoload_develop_file() {
+  local lib_name_version="$1"
+
+  [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
+
+  local expected_content=$(
+    cat << EOF
+<?php
+
+if (md5_file(__DIR__ . '/decomposer.json') != '$( md5checksum_decomposer_json )')
+{
+    die("Decomposer autoload file is outdated. Please re-run 'decomposer develop'
+");
+}
+
+require_once '${lib_name_version}.php';
+
+?>
+EOF
+  )
 
   local result_content=$(
     cat "${TEST_WORKING_DIR}/decomposer.autoload.inc.php"
