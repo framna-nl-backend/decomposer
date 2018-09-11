@@ -1,11 +1,9 @@
-{
-    "Alpha": {
-        "url": "${TEST_REPOS_DIR}/alpha-lib",
-        "revision": "master",
-        "version": "1.0",
-        "psr4": {
-            "prefix": "alpha-lib",
-            "search-path": "/src/alpha/"
-         }
-     }
+"Alpha": {
+    "url": "${TEST_REPOS_DIR}/alpha-lib",
+    "revision": "master",
+    "version": "1.0",
+    "psr4": {
+        "prefix": "alpha-lib",
+        "search-path": "/src/alpha/"
+    }
 }

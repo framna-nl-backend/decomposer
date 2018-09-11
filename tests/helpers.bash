@@ -48,11 +48,24 @@ test_suite_name() {
 }
 
 create_decomposer_json() {
-  local fixture_name="$1"
+  local fixture_names="$@"
 
-  eval "cat << EOF
+  {
+    printf '{'
+
+    local lib_jsons=
+    for fixture_name in ${fixture_names}; do
+      lib_jsons+=",$(eval "cat << EOF
 $(< "${TEST_FIXTURES_DIR}/decomposer_json/${fixture_name}.json" )
-EOF" > "${TEST_WORKING_DIR}/decomposer.json"
+EOF"
+)"
+    done
+
+    # ignore first comma
+    printf '%s' "${lib_jsons:1}"
+
+    printf '}'
+  } > "${TEST_WORKING_DIR}/decomposer.json"
 }
 
 create_repository() {
@@ -104,18 +117,16 @@ assert_lib_autoload_file() {
 }
 
 assert_project_autoload_file() {
-  local lib_name_version="$1"
+  local lib_name_versions="$@"
 
   [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
 
   local expected_content=$(
-    cat << EOF
-<?php
-
-require_once '${lib_name_version}.php';
-
-?>
-EOF
+    printf '<?php\n\n';
+    for lib_name_version in ${lib_name_versions}; do
+      printf "require_once '%s.php';\\n" "${lib_name_version}"
+    done;
+    printf '\n?>\n';
   )
 
   local result_content=$(
@@ -126,7 +137,7 @@ EOF
 }
 
 assert_project_autoload_develop_file() {
-  local lib_name_version="$1"
+  local lib_name_versions="$@"
 
   [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
 
@@ -139,12 +150,16 @@ if (md5_file(__DIR__ . '/decomposer.json') != '$( md5checksum_decomposer_json )'
     die("Decomposer autoload file is outdated. Please re-run 'decomposer develop'
 ");
 }
-
-require_once '${lib_name_version}.php';
-
-?>
 EOF
   )
+
+  expected_content+="$(
+    printf '\n\n';
+    for lib_name_version in ${lib_name_versions}; do
+      printf "require_once '%s.php';\\n" "${lib_name_version}"
+    done;
+    printf '\n?>\n';
+  )"
 
   local result_content=$(
     cat "${TEST_WORKING_DIR}/decomposer.autoload.inc.php"
