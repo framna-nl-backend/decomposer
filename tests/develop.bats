@@ -13,11 +13,11 @@ SUITE_NAME=$( test_suite_name )
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_lib_folder Alpha-1.0 "${alpha_lib_revision_hash}"
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
-  assert_lib_file Alpha-1.0 alpha_psr4
+  assert_lib_autoload_file Alpha-1.0 alpha_psr4
 
-  assert_autoload_develop_file Alpha-1.0
+  assert_project_autoload_develop_file Alpha-1.0
 }
 
 @test "${SUITE_NAME}: single new PSR0 lib" {
@@ -29,9 +29,9 @@ SUITE_NAME=$( test_suite_name )
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Beta...done" ]
 
-  assert_lib_folder Beta-1.0 "${beta_lib_revision_hash}"
+  assert_lib_installed Beta-1.0 "${beta_lib_revision_hash}"
 
-  assert_lib_file Beta-1.0 beta_psr0
+  assert_lib_autoload_file Beta-1.0 beta_psr0
 
-  assert_autoload_develop_file Beta-1.0
+  assert_project_autoload_develop_file Beta-1.0
 }

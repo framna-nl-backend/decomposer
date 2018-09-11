@@ -27,7 +27,7 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[0]}" = "Installing Alpha...done" ]
 
   # assert there was no change to the library
-  assert_lib_folder Alpha-1.0 "${custom_alpha_lib_revision_hash}"
+  assert_lib_installed Alpha-1.0 "${custom_alpha_lib_revision_hash}"
 }
 
 @test "${SUITE_NAME}: already existing library as git worktree" {
@@ -54,5 +54,5 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[0]}" = "Installing Alpha...done" ]
 
   # assert there was no change to the library
-  assert_lib_folder Alpha-1.0 "${custom_alpha_lib_revision_hash}"
+  assert_lib_installed Alpha-1.0 "${custom_alpha_lib_revision_hash}"
 }

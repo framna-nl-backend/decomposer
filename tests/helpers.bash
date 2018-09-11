@@ -56,37 +56,37 @@ EOF" > "${TEST_WORKING_DIR}/decomposer.json"
 }
 
 create_repository() {
-  local name="$1"
+  local repo_name="$1"
 
   {
-    git init "${TEST_REPOS_DIR}/${name}"
-    git -C "${TEST_REPOS_DIR}/${name}" commit \
+    git init "${TEST_REPOS_DIR}/${repo_name}"
+    git -C "${TEST_REPOS_DIR}/${repo_name}" commit \
       --allow-empty --message 'commit 1'
   } > /dev/null
 
   local revision_hash=$(
-    git -C "${TEST_REPOS_DIR}/${name}" \
+    git -C "${TEST_REPOS_DIR}/${repo_name}" \
       rev-parse HEAD
   )
 
   printf "${revision_hash}"
 }
 
-assert_lib_folder() {
-  local name="$1"
+assert_lib_installed() {
+  local lib_name_version="$1"
   local expected_head_hash="$2"
 
-  [ -d "${TARGET_DIR}/${name}" ]
+  [ -d "${TARGET_DIR}/${lib_name_version}" ]
 
   local result_head_hash=$(
-    git -C "${TARGET_DIR}/${name}" \
+    git -C "${TARGET_DIR}/${lib_name_version}" \
       rev-parse --verify HEAD
   )
 
   [ "${expected_head_hash}" == "${result_head_hash}" ]
 }
 
-assert_lib_file() {
+assert_lib_autoload_file() {
   local lib_name_version="$1"
   local fixture_name="$2"
 
@@ -103,7 +103,7 @@ assert_lib_file() {
   [ "${expected_content}" == "${result_content}" ]
 }
 
-assert_autoload_file() {
+assert_project_autoload_file() {
   local lib_name_version="$1"
 
   [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
@@ -125,7 +125,7 @@ EOF
   [ "${expected_content}" == "${result_content}" ]
 }
 
-assert_autoload_develop_file() {
+assert_project_autoload_develop_file() {
   local lib_name_version="$1"
 
   [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
