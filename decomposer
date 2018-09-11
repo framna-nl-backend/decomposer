@@ -36,14 +36,16 @@ decomposer_install() {
 
   printf 'Installing %s...' "${package}"
 
+  if [ "${sub_dir}" == 'null' ]; then
+    local package_target_dir="${package}-${version}"
+  else
+    local package_target_dir="${package}-${version}${sub_dir}"
+  fi
+
   cd "${TARGET_DIR}"
 
   if ! [ -d "${package}-${version}" ]; then
-    if [ "${sub_dir}" == 'null' ]; then
-      git clone "${url}" "${package}-${version}" &> /dev/null
-    else
-      git clone "${url}" "${package}-${version}${sub_dir}" &> /dev/null
-    fi
+    git clone "${url}" "${package_target_dir}" &> /dev/null
 
     if ! [ "$?" = 0 ]; then
       printf "Cloning git repository for '%s' failed!\\n" "${package}"
@@ -52,11 +54,8 @@ decomposer_install() {
   fi
 
   if ! [ -h "${package}-${version}" ]; then
-    if [ "${sub_dir}" == 'null' ]; then
-      cd "${package}-${version}"
-    else
-      cd "${package}-${version}${sub_dir}"
-    fi
+      cd "${package_target_dir}"
+
       if ! [ -f '.git' ]; then
         if [ "$( jq ".\"${package}\"|has(\"revision\")" "${file}" )" = 'true' ]; then
           local revision=$( jq -r ".\"${package}\".revision" "${file}" )
@@ -107,7 +106,7 @@ decomposer_install() {
 
 set_include_path(
     get_include_path() . ':' .
-    __DIR__ . '/${package}-${version}${psr0_path}'
+    __DIR__ . '/${package_target_dir}${psr0_path}'
 );
 
 ?>
@@ -119,7 +118,7 @@ EOF
     cat << EOF > "${package}-${version}.php"
 <?php
 
-autoload_register_psr4_prefix('${psr4_prefix}', '${package}-${version}${psr4_path}');
+autoload_register_psr4_prefix('${psr4_prefix}', '${package_target_dir}${psr4_path}');
 
 ?>
 EOF

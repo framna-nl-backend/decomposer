@@ -1,0 +1,10 @@
+"Alpha": {
+    "url": "${TEST_REPOS_DIR}/alpha-lib",
+    "revision": "master",
+    "version": "1.0",
+    "target-dir": "/Target",
+    "psr4": {
+        "prefix": "alpha-lib",
+        "search-path": "/src/alpha/"
+    }
+}
