@@ -1,0 +1,8 @@
+"Gamma": {
+    "url": "${TEST_REPOS_DIR}/gamma-lib",
+    "revision": "master",
+    "version": "1.0",
+    "psr0": {
+        "path": "/src/gamma/"
+    }
+}

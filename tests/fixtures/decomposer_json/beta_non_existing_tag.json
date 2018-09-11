@@ -1,0 +1,7 @@
+"Beta": {
+    "url": "${TEST_REPOS_DIR}/beta-lib",
+    "version": "1.2.3",
+    "psr0": {
+        "path": "/src/beta/"
+    }
+}
