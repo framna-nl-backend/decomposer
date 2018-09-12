@@ -1,6 +1,7 @@
 load helpers/variables
 load helpers/hooks
 load helpers/main
+load helpers/creations
 
 # This suite tests the validation of inputs
 
@@ -34,3 +35,36 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
 
+@test "${SUITE_NAME}: target dir doesn't exist" {
+  create_decomposer_json alpha_psr4
+
+  export TARGET_DIR='/xxx'
+
+  run_decomposer develop
+  [ "${status}" -eq 1 ]
+  [ "${lines[0]}" = "decomposer: TARGET_DIR '/xxx' is not a writable directory." ]
+  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+}
+
+@test "${SUITE_NAME}: target dir is a file" {
+  create_decomposer_json alpha_psr4
+
+  export TARGET_DIR="${TEST_TMP_DIR}/file"
+  touch "${TEST_TMP_DIR}/file"
+
+  run_decomposer develop
+  [ "${status}" -eq 1 ]
+  [ "${lines[0]}" = "decomposer: TARGET_DIR '${TEST_TMP_DIR}/file' is not a writable directory." ]
+  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+}
+
+@test "${SUITE_NAME}: target dir is not writable" {
+  create_decomposer_json alpha_psr4
+
+  chmod -w "${TARGET_DIR}"
+
+  run_decomposer develop
+  [ "${status}" -eq 1 ]
+  [ "${lines[0]}" = "decomposer: TARGET_DIR '${TARGET_DIR}' is not a writable directory." ]
+  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+}

@@ -180,13 +180,20 @@ EOF
   printf '\n?>\n' >> "${autoload}"
 }
 
-decomposer_run() {
-  local include_outdated_check="$1"
-
+validate_inputs() {
   if ! [ -f "${CWD}/decomposer.json" ]; then
     error 'No decomposer.json found.'
   fi
 
+  if ! [ -d "${TARGET_DIR}" -a -w "${TARGET_DIR}" ]; then
+    error "TARGET_DIR '${TARGET_DIR}' is not a writable directory."
+  fi
+}
+
+decomposer_run() {
+  local include_outdated_check="$1"
+
+  validate_inputs
   decomposer_process_file "${CWD}/decomposer.json"
   decomposer_create_autoload "${CWD}/decomposer.json" "${include_outdated_check}"
 }
