@@ -151,13 +151,14 @@ md5checksum() {
 
 decomposer_create_autoload() {
   local file=$1
-  local develop=$2
+  local include_outdated_check=$2
+
   local libraries=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
   local autoload="${CWD}/decomposer.autoload.inc.php"
 
   printf '<?php\n\n' > "${autoload}"
 
-  if [ "${develop}" = 'develop' ]; then
+  if [ -n "${include_outdated_check}" ]; then
     local md5=$( md5checksum "${CWD}/decomposer.json" )
 
     cat << EOF >> "${autoload}"
@@ -179,24 +180,25 @@ EOF
   printf '\n?>\n' >> "${autoload}"
 }
 
+decomposer_run() {
+  local include_outdated_check="$1"
+
+  if ! [ -f "${CWD}/decomposer.json" ]; then
+    error 'No decomposer.json found.'
+  fi
+
+  decomposer_process_file "${CWD}/decomposer.json"
+  decomposer_create_autoload "${CWD}/decomposer.json" "${include_outdated_check}"
+}
+
 COMMAND="$1"
 
 case "${COMMAND}" in
   'install')
-    if ! [ -f "${CWD}/decomposer.json" ]; then
-      error 'No decomposer.json found.'
-    fi
-
-    decomposer_process_file "${CWD}/decomposer.json"
-    decomposer_create_autoload "${CWD}/decomposer.json"
+    decomposer_run
     ;;
   'develop')
-    if ! [ -f "${CWD}/decomposer.json" ]; then
-      error 'No decomposer.json found.'
-    fi
-
-    decomposer_process_file "${CWD}/decomposer.json"
-    decomposer_create_autoload "${CWD}/decomposer.json" 'develop'
+    decomposer_run include_outdated_check
     ;;
   'help')
     usage
