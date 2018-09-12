@@ -27,25 +27,25 @@ error() {
 } >&2
 
 decomposer_install() {
-  local package=$1
+  local library=$1
   local file=$2
 
-  local url=$( jq -r ".\"${package}\".url" "${file}" )
-  local version=$( jq -r ".\"${package}\".version" "${file}" )
-  local sub_dir=$( jq -r ".\"${package}\".\"target-dir\"" "${file}" )
+  local url=$( jq -r ".\"${library}\".url" "${file}" )
+  local version=$( jq -r ".\"${library}\".version" "${file}" )
+  local sub_dir=$( jq -r ".\"${library}\".\"target-dir\"" "${file}" )
 
-  printf 'Installing %s...' "${package}"
+  printf 'Installing %s...' "${library}"
 
   if [ "${sub_dir}" == 'null' ]; then
-    local package_target_dir="${package}-${version}"
+    local library_target_dir="${library}-${version}"
   else
-    local package_target_dir="${package}-${version}${sub_dir}"
+    local library_target_dir="${library}-${version}${sub_dir}"
   fi
 
   cd "${TARGET_DIR}"
 
-  if ! [ -d "${package}-${version}" ]; then
-    git clone "${url}" "${package_target_dir}" &> /dev/null
+  if ! [ -d "${library}-${version}" ]; then
+    git clone "${url}" "${library_target_dir}" &> /dev/null
 
     if ! [ "$?" = 0 ]; then
       printf "failed (cloning git repository failed)\\n"
@@ -53,12 +53,12 @@ decomposer_install() {
     fi
   fi
 
-  if ! [ -h "${package}-${version}" ]; then
-      cd "${package_target_dir}"
+  if ! [ -h "${library}-${version}" ]; then
+      cd "${library_target_dir}"
 
       if ! [ -f '.git' ]; then
-        if [ "$( jq ".\"${package}\"|has(\"revision\")" "${file}" )" = 'true' ]; then
-          local revision=$( jq -r ".\"${package}\".revision" "${file}" )
+        if [ "$( jq ".\"${library}\"|has(\"revision\")" "${file}" )" = 'true' ]; then
+          local revision=$( jq -r ".\"${library}\".revision" "${file}" )
         else
           local revision="${version}"
         fi
@@ -98,27 +98,27 @@ decomposer_install() {
     cd "${TARGET_DIR}"
   fi
 
-  if [ "$( jq ".\"${package}\"|has(\"psr0\")" "${file}" )" = 'true' ]; then
-    local psr0_path=$( jq -r ".\"${package}\".psr0.path" "${file}" )
+  if [ "$( jq ".\"${library}\"|has(\"psr0\")" "${file}" )" = 'true' ]; then
+    local psr0_path=$( jq -r ".\"${library}\".psr0.path" "${file}" )
 
-    cat << EOF > "${package}-${version}.php"
+    cat << EOF > "${library}-${version}.php"
 <?php
 
 set_include_path(
     get_include_path() . ':' .
-    __DIR__ . '/${package_target_dir}${psr0_path}'
+    __DIR__ . '/${library_target_dir}${psr0_path}'
 );
 
 ?>
 EOF
-  elif [ "$( jq ".\"${package}\"|has(\"psr4\")" "${file}" )" = 'true' ]; then
-    local psr4_prefix=$( jq -r ".\"${package}\".psr4.prefix" "${file}" )
-    local psr4_path=$( jq -r ".\"${package}\".psr4.\"search-path\"" "${file}" )
+  elif [ "$( jq ".\"${library}\"|has(\"psr4\")" "${file}" )" = 'true' ]; then
+    local psr4_prefix=$( jq -r ".\"${library}\".psr4.prefix" "${file}" )
+    local psr4_path=$( jq -r ".\"${library}\".psr4.\"search-path\"" "${file}" )
 
-    cat << EOF > "${package}-${version}.php"
+    cat << EOF > "${library}-${version}.php"
 <?php
 
-autoload_register_psr4_prefix('${psr4_prefix}', '${package_target_dir}${psr4_path}');
+autoload_register_psr4_prefix('${psr4_prefix}', '${library_target_dir}${psr4_path}');
 
 ?>
 EOF
@@ -129,10 +129,10 @@ EOF
 
 decomposer_process_file() {
   local file=$1
-  local packages=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
+  local libraries=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
 
-  for package in ${packages}; do
-    decomposer_install "${package}" "${file}"
+  for library in ${libraries}; do
+    decomposer_install "${library}" "${file}"
   done
 }
 
@@ -152,7 +152,7 @@ md5checksum() {
 decomposer_create_autoload() {
   local file=$1
   local develop=$2
-  local packages=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
+  local libraries=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
   local autoload="${CWD}/decomposer.autoload.inc.php"
 
   printf '<?php\n\n' > "${autoload}"
@@ -170,10 +170,10 @@ if (md5_file(__DIR__ . '/decomposer.json') != '${md5}')
 EOF
   fi
 
-  for package in ${packages}; do
-    local version=$( jq -r ".\"${package}\".version" "${file}" )
+  for library in ${libraries}; do
+    local version=$( jq -r ".\"${library}\".version" "${file}" )
 
-    printf "require_once '%s-%s.php';\\n" "${package}" "${version}" >> "${autoload}"
+    printf "require_once '%s-%s.php';\\n" "${library}" "${version}" >> "${autoload}"
   done
 
   printf '\n?>\n' >> "${autoload}"
