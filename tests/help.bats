@@ -1,4 +1,6 @@
-load helpers
+load helpers/variables
+load helpers/hooks
+load helpers/main
 
 # This suite tests the "help" command
 

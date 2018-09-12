@@ -1,4 +1,8 @@
-load helpers
+load helpers/variables
+load helpers/hooks
+load helpers/main
+load helpers/creations
+load helpers/assertions
 
 # This suite tests the different possible version and revision usages
 
