@@ -73,8 +73,9 @@ create_repository() {
 
   {
     git init "${TEST_REPOS_DIR}/${repo_name}"
-    git -C "${TEST_REPOS_DIR}/${repo_name}" commit \
-      --allow-empty --message 'commit 1'
+    echo "${repo_name}" > "${TEST_REPOS_DIR}/${repo_name}/README"
+    git -C "${TEST_REPOS_DIR}/${repo_name}" add README
+    git -C "${TEST_REPOS_DIR}/${repo_name}" commit --message 'commit 1'
   } > /dev/null
 
   local revision_hash=$(
