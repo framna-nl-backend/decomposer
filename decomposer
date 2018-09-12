@@ -54,46 +54,46 @@ decomposer_install() {
   fi
 
   if ! [ -h "${library}-${version}" ]; then
-      cd "${library_target_dir}"
+    cd "${library_target_dir}"
 
-      if ! [ -f '.git' ]; then
-        if [ "$( jq ".\"${library}\"|has(\"revision\")" "${file}" )" = 'true' ]; then
-          local revision=$( jq -r ".\"${library}\".revision" "${file}" )
-        else
-          local revision="${version}"
-        fi
-
-        git fetch origin &> /dev/null
-
-        local rev_origin=$( git branch -a | grep "/origin/${revision}" )
-
-        if [ -z "${rev_origin}" ]; then
-          local git_type=$( git cat-file -t "${revision}" 2> /dev/null )
-          local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
-        else
-          local git_type=$( git cat-file -t "origin/${revision}" 2> /dev/null )
-          local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
-        fi
-
-        local rev_head=$( git rev-parse HEAD )
-
-        if [ "${git_type}" = 'commit' -o "${git_type}" = 'tag' ]; then
-          if ! [ -z "${rev_origin}" ]; then
-            if ! [ "${rev_head}" = "$( git rev-parse "origin/${revision}" )" ]; then
-              git reset --hard "origin/${revision}" &> /dev/null
-            fi
-          elif ! [ "$rev_head" = "$( git rev-parse "${revision}" )" ]; then
-            git reset --hard "${revision}" &> /dev/null
-          fi
-        elif [ "${git_alt_type}" = 'commit' -o "${git_alt_type}" = 'tag' ]; then
-          if ! [ "${rev_head}" = "$( git rev-parse "v${revision}" )" ]; then
-            git reset --hard "v${revision}" &> /dev/null
-          fi
-        else
-          printf "failed (revision '%s' not found)\\n" "${revision}"
-          return
-        fi
+    if ! [ -f '.git' ]; then
+      if [ "$( jq ".\"${library}\"|has(\"revision\")" "${file}" )" = 'true' ]; then
+        local revision=$( jq -r ".\"${library}\".revision" "${file}" )
+      else
+        local revision="${version}"
       fi
+
+      git fetch origin &> /dev/null
+
+      local rev_origin=$( git branch -a | grep "/origin/${revision}" )
+
+      if [ -z "${rev_origin}" ]; then
+        local git_type=$( git cat-file -t "${revision}" 2> /dev/null )
+        local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
+      else
+        local git_type=$( git cat-file -t "origin/${revision}" 2> /dev/null )
+        local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
+      fi
+
+      local rev_head=$( git rev-parse HEAD )
+
+      if [ "${git_type}" = 'commit' -o "${git_type}" = 'tag' ]; then
+        if ! [ -z "${rev_origin}" ]; then
+          if ! [ "${rev_head}" = "$( git rev-parse "origin/${revision}" )" ]; then
+            git reset --hard "origin/${revision}" &> /dev/null
+          fi
+        elif ! [ "$rev_head" = "$( git rev-parse "${revision}" )" ]; then
+          git reset --hard "${revision}" &> /dev/null
+        fi
+      elif [ "${git_alt_type}" = 'commit' -o "${git_alt_type}" = 'tag' ]; then
+        if ! [ "${rev_head}" = "$( git rev-parse "v${revision}" )" ]; then
+          git reset --hard "v${revision}" &> /dev/null
+        fi
+      else
+        printf "failed (revision '%s' not found)\\n" "${revision}"
+        return
+      fi
+    fi
 
     cd "${TARGET_DIR}"
   fi
