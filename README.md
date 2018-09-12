@@ -39,6 +39,10 @@ Decomposer currently supports these commands:
   > Same as `decomposer install`, but additionally also adds a check to the include file that returns an
     error in case the include file is outdated.
 
+The extra check is mainly useful on a development environment to get warned to rerun `decomposer` after the
+project's last pull of changes updated the `decomposer.json` file. It should not be necessary on a controlled
+production environment. Not having it there is saving some unnecessary computing for every process.
+
 Install location of libraries is controlled using the environment variable `TARGET_DIR`. By default this is
 `/var/www/libs`.
 
