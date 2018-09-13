@@ -89,3 +89,77 @@ SUITE_NAME=$( test_suite_name )
 
   assert_project_autoload_file Alpha-1.0
 }
+
+@test "${SUITE_NAME}: existing lib fetch new tag" {
+  create_decomposer_json alpha_tag_version
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  # create new commit in repository and tag
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+  git -C "${TEST_REPOS_DIR}/alpha-lib" tag 1.0
+
+  local tag_alpha_lib_revision_hash=$(
+    git -C "${TEST_REPOS_DIR}/alpha-lib" \
+      rev-parse HEAD
+  )
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
+}
+
+@test "${SUITE_NAME}: existing lib fetch new branch" {
+  create_decomposer_json alpha_branch_revision
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  # create new branch with new commit in repository
+  git -C "${TEST_REPOS_DIR}/alpha-lib" checkout -b rc1
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+
+  local branch_alpha_lib_revision_hash=$(
+    git -C "${TEST_REPOS_DIR}/alpha-lib" \
+      rev-parse HEAD
+  )
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${branch_alpha_lib_revision_hash}"
+}
+
+@test "${SUITE_NAME}: existing lib fetch new commits" {
+  create_decomposer_json alpha_psr4
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  # create new commit in repository
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+
+  local commit_alpha_lib_revision_hash=$(
+    git -C "${TEST_REPOS_DIR}/alpha-lib" \
+      rev-parse HEAD
+  )
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+}
