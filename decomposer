@@ -65,6 +65,11 @@ decomposer_install() {
 
       git fetch origin &> /dev/null
 
+      if ! [ "$?" = 0 ]; then
+        printf "failed (fetching changes failed)\\n"
+        return
+      fi
+
       local rev_origin=$( git branch -a | grep "/origin/${revision}" )
 
       if [ -z "${rev_origin}" ]; then
@@ -76,22 +81,32 @@ decomposer_install() {
       fi
 
       local rev_head=$( git rev-parse HEAD )
+      local revision_reset=
 
       if [ "${git_type}" = 'commit' -o "${git_type}" = 'tag' ]; then
         if ! [ -z "${rev_origin}" ]; then
           if ! [ "${rev_head}" = "$( git rev-parse "origin/${revision}" )" ]; then
-            git reset --hard "origin/${revision}" &> /dev/null
+            local revision_reset="origin/${revision}"
           fi
         elif ! [ "$rev_head" = "$( git rev-parse "${revision}" )" ]; then
-          git reset --hard "${revision}" &> /dev/null
+          local revision_reset="${revision}"
         fi
       elif [ "${git_alt_type}" = 'commit' -o "${git_alt_type}" = 'tag' ]; then
         if ! [ "${rev_head}" = "$( git rev-parse "v${revision}" )" ]; then
-          git reset --hard "v${revision}" &> /dev/null
+          local revision_reset="v${revision}"
         fi
       else
         printf "failed (revision '%s' not found)\\n" "${revision}"
         return
+      fi
+
+      if [ -n "${revision_reset}" ]; then
+        git reset --hard "${revision_reset}" &> /dev/null
+
+        if ! [ "$?" = 0 ]; then
+          printf "failed (resetting changes failed)\\n"
+          return
+        fi
       fi
     fi
 
