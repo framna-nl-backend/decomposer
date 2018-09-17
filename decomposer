@@ -45,9 +45,7 @@ decomposer_install() {
   cd "${TARGET_DIR}"
 
   if ! [ -d "${library}-${version}" ]; then
-    git clone "${url}" "${library_target_dir}" &> /dev/null
-
-    if ! [ "$?" = 0 ]; then
+    if ! git clone "${url}" "${library_target_dir}" &> /dev/null; then
       printf 'failed (cloning git repository failed)\n'
       return
     fi
@@ -63,9 +61,7 @@ decomposer_install() {
         local revision="${version}"
       fi
 
-      git fetch origin &> /dev/null
-
-      if ! [ "$?" = 0 ]; then
+      if ! git fetch origin &> /dev/null; then
         printf 'failed (fetching changes failed)\n'
         return
       fi
@@ -101,9 +97,7 @@ decomposer_install() {
       fi
 
       if [ -n "${revision_reset}" ]; then
-        git reset --hard "${revision_reset}" &> /dev/null
-
-        if ! [ "$?" = 0 ]; then
+        if ! git reset --hard "${revision_reset}" &> /dev/null; then
           printf 'failed (resetting changes failed)\n'
           return
         fi
