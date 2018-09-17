@@ -61,6 +61,23 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${custom_alpha_lib_revision_hash}"
 }
 
+@test "${SUITE_NAME}: already existing library but not a git repository" {
+  create_decomposer_json alpha_psr4
+
+  create_repository alpha-lib
+
+  # create library as package with custom file
+  mkdir "${TARGET_DIR}/Alpha-1.0"
+  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  # assert there was no change to the file
+  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+}
+
 @test "${SUITE_NAME}: correct tag with non commited modifications" {
   create_decomposer_json alpha_tag_version
 

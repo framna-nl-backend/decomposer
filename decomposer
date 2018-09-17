@@ -56,7 +56,7 @@ decomposer_install() {
   if ! [ -h "${library}-${version}" ]; then
     cd "${library_target_dir}"
 
-    if ! [ -f '.git' ]; then
+    if [ -d '.git' ]; then
       if [ "$( jq ".\"${library}\"|has(\"revision\")" "${file}" )" = 'true' ]; then
         local revision=$( jq -r ".\"${library}\".revision" "${file}" )
       else
