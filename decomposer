@@ -27,36 +27,36 @@ error() {
 } >&2
 
 decomposer_install() {
-  local library=$1
-  local file=$2
+  local name=$1
+  local object=$2
 
-  local url=$( jq -r ".\"${library}\".url" "${file}" )
-  local version=$( jq -r ".\"${library}\".version" "${file}" )
-  local sub_dir=$( jq -r ".\"${library}\".\"target-dir\"" "${file}" )
+  local url=$( jq -r '.url' <<< "${object}" )
+  local version=$( jq -r '.version' <<< "${object}" )
+  local sub_dir=$( jq -r '."target-dir"' <<< "${object}" )
 
-  printf 'Installing %s...' "${library}"
+  printf 'Installing %s...' "${name}"
 
   if [ "${sub_dir}" == 'null' ]; then
-    local library_target_dir="${library}-${version}"
+    local library_target_dir="${name}-${version}"
   else
-    local library_target_dir="${library}-${version}${sub_dir}"
+    local library_target_dir="${name}-${version}${sub_dir}"
   fi
 
   cd "${TARGET_DIR}"
 
-  if ! [ -d "${library}-${version}" ]; then
+  if ! [ -d "${name}-${version}" ]; then
     if ! git clone "${url}" "${library_target_dir}" &> /dev/null; then
       printf 'failed (cloning git repository failed)\n'
       return
     fi
   fi
 
-  if ! [ -h "${library}-${version}" ]; then
+  if ! [ -h "${name}-${version}" ]; then
     cd "${library_target_dir}"
 
     if [ -d '.git' ]; then
-      if [ "$( jq ".\"${library}\"|has(\"revision\")" "${file}" )" = 'true' ]; then
-        local revision=$( jq -r ".\"${library}\".revision" "${file}" )
+      if [ "$( jq 'has("revision")' <<< "${object}" )" = 'true' ]; then
+        local revision=$( jq -r '.revision' <<< "${object}" )
       else
         local revision="${version}"
       fi
@@ -115,10 +115,10 @@ decomposer_install() {
     printf 'skipped (symlink)\n'
   fi
 
-  if [ "$( jq ".\"${library}\"|has(\"psr0\")" "${file}" )" = 'true' ]; then
-    local psr0_path=$( jq -r ".\"${library}\".psr0.path" "${file}" )
+  if [ "$( jq 'has("psr0")' <<< "${object}" )" = 'true' ]; then
+    local psr0_path=$( jq -r '.psr0.path' <<< "${object}" )
 
-    cat << EOF > "${library}-${version}.php"
+    cat << EOF > "${name}-${version}.php"
 <?php
 
 set_include_path(
@@ -128,11 +128,11 @@ set_include_path(
 
 ?>
 EOF
-  elif [ "$( jq ".\"${library}\"|has(\"psr4\")" "${file}" )" = 'true' ]; then
-    local psr4_prefix=$( jq -r ".\"${library}\".psr4.prefix" "${file}" )
-    local psr4_path=$( jq -r ".\"${library}\".psr4.\"search-path\"" "${file}" )
+  elif [ "$( jq 'has("psr4")' <<< "${object}" )" = 'true' ]; then
+    local psr4_prefix=$( jq -r '.psr4.prefix' <<< "${object}" )
+    local psr4_path=$( jq -r '.psr4."search-path"' <<< "${object}" )
 
-    cat << EOF > "${library}-${version}.php"
+    cat << EOF > "${name}-${version}.php"
 <?php
 
 autoload_register_psr4_prefix('${psr4_prefix}', '${library_target_dir}${psr4_path}');
@@ -144,10 +144,12 @@ EOF
 
 decomposer_process_file() {
   local file=$1
-  local libraries=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
 
-  for library in ${libraries}; do
-    decomposer_install "${library}" "${file}"
+  local libraries_names=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
+
+  for name in ${libraries_names}; do
+    local object=$( jq ".\"${name}\"" "${file}")
+    decomposer_install "${name}" "${object}"
   done
 }
 
