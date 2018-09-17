@@ -79,7 +79,7 @@ decomposer_install() {
       local rev_head=$( git rev-parse HEAD )
       local revision_reset=
 
-      if [ "${git_type}" = 'commit' -o "${git_type}" = 'tag' ]; then
+      if [ "${git_type}" = 'commit' ] || [ "${git_type}" = 'tag' ]; then
         if ! [ -z "${rev_origin}" ]; then
           if ! [ "${rev_head}" = "$( git rev-parse "origin/${revision}" )" ]; then
             local revision_reset="origin/${revision}"
@@ -87,7 +87,7 @@ decomposer_install() {
         elif ! [ "$rev_head" = "$( git rev-parse "${revision}" )" ]; then
           local revision_reset="${revision}"
         fi
-      elif [ "${git_alt_type}" = 'commit' -o "${git_alt_type}" = 'tag' ]; then
+      elif [ "${git_alt_type}" = 'commit' ] || [ "${git_alt_type}" = 'tag' ]; then
         if ! [ "${rev_head}" = "$( git rev-parse "v${revision}" )" ]; then
           local revision_reset="v${revision}"
         fi
@@ -200,7 +200,7 @@ validate_inputs() {
     error 'No decomposer.json found.'
   fi
 
-  if ! [ -d "${TARGET_DIR}" -a -w "${TARGET_DIR}" ]; then
+  if ! [ -d "${TARGET_DIR}" ] || ! [ -w "${TARGET_DIR}" ]; then
     error "TARGET_DIR '${TARGET_DIR}' is not a writable directory."
   fi
 }
