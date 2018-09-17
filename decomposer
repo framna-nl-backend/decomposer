@@ -48,7 +48,7 @@ decomposer_install() {
     git clone "${url}" "${library_target_dir}" &> /dev/null
 
     if ! [ "$?" = 0 ]; then
-      printf "failed (cloning git repository failed)\\n"
+      printf 'failed (cloning git repository failed)\n'
       return
     fi
   fi
@@ -66,7 +66,7 @@ decomposer_install() {
       git fetch origin &> /dev/null
 
       if ! [ "$?" = 0 ]; then
-        printf "failed (fetching changes failed)\\n"
+        printf 'failed (fetching changes failed)\n'
         return
       fi
 
@@ -104,13 +104,21 @@ decomposer_install() {
         git reset --hard "${revision_reset}" &> /dev/null
 
         if ! [ "$?" = 0 ]; then
-          printf "failed (resetting changes failed)\\n"
+          printf 'failed (resetting changes failed)\n'
           return
         fi
       fi
+    elif [ -f '.git' ]; then
+      printf 'skipped (git worktree)\n'
+    else
+      printf 'skipped (not a git repository)\n'
     fi
 
+    printf 'done\n'
+
     cd "${TARGET_DIR}"
+  else
+    printf 'skipped (symlink)\n'
   fi
 
   if [ "$( jq ".\"${library}\"|has(\"psr0\")" "${file}" )" = 'true' ]; then
@@ -138,8 +146,6 @@ autoload_register_psr4_prefix('${psr4_prefix}', '${library_target_dir}${psr4_pat
 ?>
 EOF
   fi
-
-  printf 'done\n'
 }
 
 decomposer_process_file() {
