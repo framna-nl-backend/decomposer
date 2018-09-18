@@ -32,15 +32,13 @@ decomposer_install() {
 
   local url=$( jq -r '.url' <<< "${object}" )
   local version=$( jq -r '.version' <<< "${object}" )
-  local sub_dir=$( jq -r '."target-dir"' <<< "${object}" )
+
+  local library_target_dir="${name}-${version}"
+  if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ]; then
+    library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
+  fi
 
   printf 'Installing %s...' "${name}"
-
-  if [ "${sub_dir}" == 'null' ]; then
-    local library_target_dir="${name}-${version}"
-  else
-    local library_target_dir="${name}-${version}${sub_dir}"
-  fi
 
   cd "${TARGET_DIR}"
 
