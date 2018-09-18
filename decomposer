@@ -29,6 +29,7 @@ error() {
 decomposer_install_library() {
   local name="$1"
   local object="$2"
+  local status_text_variable="$3"
 
   local url=$( jq -r '.url' <<< "${object}" )
   local version=$( jq -r '.version' <<< "${object}" )
@@ -38,26 +39,24 @@ decomposer_install_library() {
     library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
   fi
 
-  printf 'Installing %s...' "${name}"
-
   cd "${TARGET_DIR}"
 
   if ! [ -d "${name}-${version}" ]; then
     if ! git clone "${url}" "${library_target_dir}" &> /dev/null; then
-      printf 'failed (cloning git repository failed)\n'
-      return
+      printf -v "${status_text_variable}" 'cloning git repository failed'
+      return 1
     fi
   fi
 
   if [ -h "${name}-${version}" ]; then
-    printf 'skipped (symlink)\n'
-    return
+    printf -v "${status_text_variable}" 'symlink'
+    return 2
   elif [ -f "${library_target_dir}/.git" ]; then
-    printf 'skipped (git worktree)\n'
-    return
+    printf -v "${status_text_variable}" 'git worktree'
+    return 2
   elif ! [ -d "${library_target_dir}/.git" ]; then
-    printf 'skipped (not a git repository)\n'
-    return
+    printf -v "${status_text_variable}" 'not a git repository'
+    return 2
   fi
 
   cd "${library_target_dir}"
@@ -69,8 +68,8 @@ decomposer_install_library() {
   fi
 
   if ! git fetch origin &> /dev/null; then
-    printf 'failed (fetching changes failed)\n'
-    return
+    printf -v "${status_text_variable}" 'fetching changes failed'
+    return 1
   fi
 
   local rev_origin=$( git branch -a | grep "/origin/${revision}" )
@@ -99,20 +98,16 @@ decomposer_install_library() {
       local revision_reset="v${revision}"
     fi
   else
-    printf "failed (revision '%s' not found)\\n" "${revision}"
-    return
+    printf -v "${status_text_variable}" "revision '%s' not found" "${revision}"
+    return 1
   fi
 
   if [ -n "${revision_reset}" ]; then
     if ! git reset --hard "${revision_reset}" &> /dev/null; then
-      printf 'failed (resetting changes failed)\n'
-      return
+      printf -v "${status_text_variable}" 'resetting changes failed'
+      return 1
     fi
   fi
-
-  printf 'done\n'
-
-  cd "${TARGET_DIR}"
 }
 
 decomposer_create_library_autoload() {
@@ -125,6 +120,8 @@ decomposer_create_library_autoload() {
   if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ]; then
     library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
   fi
+
+  cd "${TARGET_DIR}"
 
   if [ "$( jq 'has("psr0")' <<< "${object}" )" = 'true' ]; then
     local psr0_path=$( jq -r '.psr0.path' <<< "${object}" )
@@ -159,8 +156,19 @@ decomposer_process_file() {
   local libraries_names=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
 
   for name in ${libraries_names}; do
+    local status_text
     local object=$( jq ".\"${name}\"" "${file}")
-    decomposer_install_library "${name}" "${object}"
+
+    printf 'Installing %s...' "${name}"
+
+    decomposer_install_library "${name}" "${object}" status_text
+
+    case "$?" in
+      0) printf 'done\n' ;;
+      1) printf 'failed (%s)\n' "${status_text}" ;;
+      2) printf 'skipped (%s)\n' "${status_text}" ;;
+    esac
+
     decomposer_create_library_autoload "${name}" "${object}"
   done
 }
