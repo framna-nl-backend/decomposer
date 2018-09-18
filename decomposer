@@ -26,7 +26,7 @@ error() {
   exit 1
 } >&2
 
-decomposer_install() {
+decomposer_install_library() {
   local name=$1
   local object=$2
 
@@ -112,6 +112,18 @@ decomposer_install() {
   else
     printf 'skipped (symlink)\n'
   fi
+}
+
+decomposer_create_library_autoload() {
+  local name="$1"
+  local object="$2"
+
+  local version=$( jq -r '.version' <<< "${object}" )
+
+  local library_target_dir="${name}-${version}"
+  if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ]; then
+    library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
+  fi
 
   if [ "$( jq 'has("psr0")' <<< "${object}" )" = 'true' ]; then
     local psr0_path=$( jq -r '.psr0.path' <<< "${object}" )
@@ -147,7 +159,8 @@ decomposer_process_file() {
 
   for name in ${libraries_names}; do
     local object=$( jq ".\"${name}\"" "${file}")
-    decomposer_install "${name}" "${object}"
+    decomposer_install_library "${name}" "${object}"
+    decomposer_create_library_autoload "${name}" "${object}"
   done
 }
 
@@ -164,7 +177,7 @@ md5checksum() {
   esac
 }
 
-decomposer_create_autoload() {
+decomposer_create_project_autoload() {
   local file=$1
   local include_outdated_check=$2
 
@@ -210,7 +223,7 @@ decomposer_run() {
 
   validate_inputs
   decomposer_process_file "${CWD}/decomposer.json"
-  decomposer_create_autoload "${CWD}/decomposer.json" "${include_outdated_check}"
+  decomposer_create_project_autoload "${CWD}/decomposer.json" "${include_outdated_check}"
 }
 
 COMMAND="$1"
