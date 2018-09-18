@@ -49,69 +49,70 @@ decomposer_install_library() {
     fi
   fi
 
-  if ! [ -h "${name}-${version}" ]; then
-    cd "${library_target_dir}"
-
-    if [ -d '.git' ]; then
-      if [ "$( jq 'has("revision")' <<< "${object}" )" = 'true' ]; then
-        local revision=$( jq -r '.revision' <<< "${object}" )
-      else
-        local revision="${version}"
-      fi
-
-      if ! git fetch origin &> /dev/null; then
-        printf 'failed (fetching changes failed)\n'
-        return
-      fi
-
-      local rev_origin=$( git branch -a | grep "/origin/${revision}" )
-
-      if [ -z "${rev_origin}" ]; then
-        local git_type=$( git cat-file -t "${revision}" 2> /dev/null )
-        local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
-      else
-        local git_type=$( git cat-file -t "origin/${revision}" 2> /dev/null )
-        local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
-      fi
-
-      local rev_head=$( git rev-parse HEAD )
-      local revision_reset=
-
-      if [ "${git_type}" = 'commit' ] || [ "${git_type}" = 'tag' ]; then
-        if ! [ -z "${rev_origin}" ]; then
-          if ! [ "${rev_head}" = "$( git rev-parse "origin/${revision}" )" ]; then
-            local revision_reset="origin/${revision}"
-          fi
-        elif ! [ "$rev_head" = "$( git rev-parse "${revision}" )" ]; then
-          local revision_reset="${revision}"
-        fi
-      elif [ "${git_alt_type}" = 'commit' ] || [ "${git_alt_type}" = 'tag' ]; then
-        if ! [ "${rev_head}" = "$( git rev-parse "v${revision}" )" ]; then
-          local revision_reset="v${revision}"
-        fi
-      else
-        printf "failed (revision '%s' not found)\\n" "${revision}"
-        return
-      fi
-
-      if [ -n "${revision_reset}" ]; then
-        if ! git reset --hard "${revision_reset}" &> /dev/null; then
-          printf 'failed (resetting changes failed)\n'
-          return
-        fi
-      fi
-    elif [ -f '.git' ]; then
-      printf 'skipped (git worktree)\n'
-    else
-      printf 'skipped (not a git repository)\n'
-    fi
-
-    printf 'done\n'
-
-    cd "${TARGET_DIR}"
-  else
+  if [ -h "${name}-${version}" ]; then
     printf 'skipped (symlink)\n'
+    return
+  elif [ -f "${library_target_dir}/.git" ]; then
+    printf 'skipped (git worktree)\n'
+    return
+  elif ! [ -d "${library_target_dir}/.git" ]; then
+    printf 'skipped (not a git repository)\n'
+    return
   fi
+
+  cd "${library_target_dir}"
+
+  if [ "$( jq 'has("revision")' <<< "${object}" )" = 'true' ]; then
+    local revision=$( jq -r '.revision' <<< "${object}" )
+  else
+    local revision="${version}"
+  fi
+
+  if ! git fetch origin &> /dev/null; then
+    printf 'failed (fetching changes failed)\n'
+    return
+  fi
+
+  local rev_origin=$( git branch -a | grep "/origin/${revision}" )
+
+  if [ -z "${rev_origin}" ]; then
+    local git_type=$( git cat-file -t "${revision}" 2> /dev/null )
+    local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
+  else
+    local git_type=$( git cat-file -t "origin/${revision}" 2> /dev/null )
+    local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
+  fi
+
+  local rev_head=$( git rev-parse HEAD )
+  local revision_reset=
+
+  if [ "${git_type}" = 'commit' ] || [ "${git_type}" = 'tag' ]; then
+    if ! [ -z "${rev_origin}" ]; then
+      if ! [ "${rev_head}" = "$( git rev-parse "origin/${revision}" )" ]; then
+        local revision_reset="origin/${revision}"
+      fi
+    elif ! [ "$rev_head" = "$( git rev-parse "${revision}" )" ]; then
+      local revision_reset="${revision}"
+    fi
+  elif [ "${git_alt_type}" = 'commit' ] || [ "${git_alt_type}" = 'tag' ]; then
+    if ! [ "${rev_head}" = "$( git rev-parse "v${revision}" )" ]; then
+      local revision_reset="v${revision}"
+    fi
+  else
+    printf "failed (revision '%s' not found)\\n" "${revision}"
+    return
+  fi
+
+  if [ -n "${revision_reset}" ]; then
+    if ! git reset --hard "${revision_reset}" &> /dev/null; then
+      printf 'failed (resetting changes failed)\n'
+      return
+    fi
+  fi
+
+  printf 'done\n'
+
+  cd "${TARGET_DIR}"
 }
 
 decomposer_create_library_autoload() {
