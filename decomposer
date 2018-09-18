@@ -156,7 +156,7 @@ EOF
 decomposer_process_file() {
   local file="$1"
 
-  local libraries_names=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
+  local libraries_names=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
 
   for name in ${libraries_names}; do
     local object=$( jq ".\"${name}\"" "${file}")
@@ -182,7 +182,7 @@ decomposer_create_project_autoload() {
   local file="$1"
   local include_outdated_check="$2"
 
-  local libraries=$( jq -r ".|to_entries|map(\"\(.key|tostring)\")|.[]" "${file}" )
+  local libraries=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
   local autoload="${CWD}/decomposer.autoload.inc.php"
 
   printf '<?php\n\n' > "${autoload}"
