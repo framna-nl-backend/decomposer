@@ -1,0 +1,9 @@
+"Alpha_Lib": {
+    "url": "${TEST_REPOS_DIR}/alpha_lib",
+    "version": "1.0",
+    "revision": "master",
+    "psr4": {
+        "prefix": "alpha_lib",
+        "search-path": "/src/alpha_lib/"
+    }
+}
