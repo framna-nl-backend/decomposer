@@ -131,7 +131,7 @@ decomposer_create_library_autoload() {
 
 set_include_path(
     get_include_path() . ':' .
-    __DIR__ . '/${library_target_dir}${psr0_path}'
+    __DIR__ . '/${name}-${version}${psr0_path}'
 );
 
 ?>
@@ -143,7 +143,7 @@ EOF
     cat << EOF > "${name}-${version}.php"
 <?php
 
-autoload_register_psr4_prefix('${psr4_prefix}', '${library_target_dir}${psr4_path}');
+autoload_register_psr4_prefix('${psr4_prefix}', '${name}-${version}${psr4_path}');
 
 ?>
 EOF
