@@ -61,52 +61,42 @@ decomposer_install_library() {
 
   cd "${library_target_dir}"
 
+  if ! git fetch origin &> /dev/null; then
+    printf -v "${status_text_variable}" 'fetching changes failed'
+    return 1
+  fi
+
   if [ "$( jq 'has("revision")' <<< "${object}" )" = 'true' ]; then
     local revision=$( jq -r '.revision' <<< "${object}" )
   else
     local revision="${version}"
   fi
 
-  if ! git fetch origin &> /dev/null; then
-    printf -v "${status_text_variable}" 'fetching changes failed'
-    return 1
-  fi
-
-  local rev_origin=$( git branch -a | grep "/origin/${revision}" )
-
-  if [ -z "${rev_origin}" ]; then
-    local git_type=$( git cat-file -t "${revision}" 2> /dev/null )
-    local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
-  else
-    local git_type=$( git cat-file -t "origin/${revision}" 2> /dev/null )
-    local git_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
-  fi
-
-  local rev_head=$( git rev-parse HEAD )
+  local revision_type=$( git cat-file -t "${revision}" 2> /dev/null )
+  local revision_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
   local revision_reset=
 
-  if [ "${git_type}" = 'commit' ] || [ "${git_type}" = 'tag' ]; then
-    if ! [ -z "${rev_origin}" ]; then
-      if ! [ "${rev_head}" = "$( git rev-parse "origin/${revision}" )" ]; then
-        local revision_reset="origin/${revision}"
-      fi
-    elif ! [ "${rev_head}" = "$( git rev-parse "${revision}^{commit}" )" ]; then
-      local revision_reset="${revision}"
-    fi
-  elif [ "${git_alt_type}" = 'commit' ] || [ "${git_alt_type}" = 'tag' ]; then
-    if ! [ "${rev_head}" = "$( git rev-parse "v${revision}^{commit}" )" ]; then
-      local revision_reset="v${revision}"
-    fi
-  else
+  if git branch -a | grep -q "/origin/${revision}"; then
+    revision_reset="origin/${revision}"
+  elif [ "${revision_type}" = 'commit' ] || [ "${revision_type}" = 'tag' ]; then
+    revision_reset="${revision}"
+  elif [ "${revision_alt_type}" = 'commit' ] || [ "${revision_alt_type}" = 'tag' ]; then
+    revision_reset="v${revision}"
+  fi
+
+  if [ -z "${revision_reset}" ]; then
     printf -v "${status_text_variable}" "revision '%s' not found" "${revision}"
     return 1
   fi
 
-  if [ -n "${revision_reset}" ]; then
-    if ! git reset --hard "${revision_reset}" &> /dev/null; then
-      printf -v "${status_text_variable}" 'resetting changes failed'
-      return 1
-    fi
+  if [ "$( git rev-parse HEAD )" = "$( git rev-parse "${revision_reset}^{commit}" )" ]; then
+    # do not reset local modifications to correct revision
+    return 0
+  fi
+
+  if ! git reset --hard "${revision_reset}" &> /dev/null; then
+    printf -v "${status_text_variable}" 'resetting changes failed'
+    return 1
   fi
 }
 
