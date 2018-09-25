@@ -96,6 +96,62 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0 Beta-1.0 Gamma-1.0
 }
 
+@test "${SUITE_NAME}: revision points to a blob object" {
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
+  local beta_lib_revision_hash="$( create_repository beta-lib )"
+  local gamma_lib_revision_hash="$( create_repository gamma-lib )"
+
+  # create decomposer.json with existing blob revision
+  export TEST_REPOS_REVISION=$(
+    git -C "${TEST_REPOS_DIR}/beta-lib" rev-list --objects --all \
+      | grep README \
+      | cut -f 1 -d ' '
+  )
+  create_decomposer_json alpha_psr4 beta_custom_revision gamma_psr0
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+  [ "${lines[1]}" = "Installing Beta...failed (revision '${TEST_REPOS_REVISION}' not found)" ]
+  [ "${lines[2]}" = "Installing Gamma...done" ]
+
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
+  assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
+
+  assert_lib_autoload_file Alpha-1.0 alpha_psr4
+  assert_lib_autoload_file Gamma-1.0 gamma_psr0
+
+  assert_project_autoload_file Alpha-1.0 Beta-1.0 Gamma-1.0
+}
+
+@test "${SUITE_NAME}: revision points to a tree object" {
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
+  local beta_lib_revision_hash="$( create_repository beta-lib )"
+  local gamma_lib_revision_hash="$( create_repository gamma-lib )"
+
+  # create decomposer.json with existing tree revision
+  export TEST_REPOS_REVISION=$(
+    git -C "${TEST_REPOS_DIR}/beta-lib" rev-list --objects --all \
+      | grep -vE "README|${beta_lib_revision_hash}" \
+      | cut -f 1 -d ' '
+  )
+  create_decomposer_json alpha_psr4 beta_custom_revision gamma_psr0
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+  [ "${lines[1]}" = "Installing Beta...failed (revision '${TEST_REPOS_REVISION}' not found)" ]
+  [ "${lines[2]}" = "Installing Gamma...done" ]
+
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
+  assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
+
+  assert_lib_autoload_file Alpha-1.0 alpha_psr4
+  assert_lib_autoload_file Gamma-1.0 gamma_psr0
+
+  assert_project_autoload_file Alpha-1.0 Beta-1.0 Gamma-1.0
+}
+
 @test "${SUITE_NAME}: fetching changes fails" {
   create_decomposer_json alpha_psr4 beta_psr0 gamma_psr0
 
