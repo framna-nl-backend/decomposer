@@ -90,11 +90,11 @@ decomposer_install_library() {
       if ! [ "${rev_head}" = "$( git rev-parse "origin/${revision}" )" ]; then
         local revision_reset="origin/${revision}"
       fi
-    elif ! [ "$rev_head" = "$( git rev-parse "${revision}" )" ]; then
+    elif ! [ "${rev_head}" = "$( git rev-parse "${revision}^{commit}" )" ]; then
       local revision_reset="${revision}"
     fi
   elif [ "${git_alt_type}" = 'commit' ] || [ "${git_alt_type}" = 'tag' ]; then
-    if ! [ "${rev_head}" = "$( git rev-parse "v${revision}" )" ]; then
+    if ! [ "${rev_head}" = "$( git rev-parse "v${revision}^{commit}" )" ]; then
       local revision_reset="v${revision}"
     fi
   else

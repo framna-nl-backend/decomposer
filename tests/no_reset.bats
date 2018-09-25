@@ -30,6 +30,28 @@ SUITE_NAME=$( test_suite_name )
   [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
 }
 
+@test "${SUITE_NAME}: correct annotated tag with non commited modifications" {
+  create_decomposer_json alpha_tag_version
+
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
+
+  # tag current HEAD
+  git -C "${TEST_REPOS_DIR}/alpha-lib" tag 1.0 -a -m 'tag'
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  # modify file
+  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
+
+  # assert there was no change to the file
+  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+}
+
 @test "${SUITE_NAME}: correct branch with non commited modifications" {
   create_decomposer_json alpha_branch_revision
 

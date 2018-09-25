@@ -115,6 +115,31 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
 }
 
+@test "${SUITE_NAME}: existing lib fetch new annotated tag" {
+  create_decomposer_json alpha_tag_version
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  # create new commit in repository and tag
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+  git -C "${TEST_REPOS_DIR}/alpha-lib" tag 1.0 -a -m 'tag'
+
+  local tag_alpha_lib_revision_hash=$(
+    git -C "${TEST_REPOS_DIR}/alpha-lib" \
+      rev-parse HEAD
+  )
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
+}
+
 @test "${SUITE_NAME}: existing lib fetch new branch" {
   create_decomposer_json alpha_branch_revision
 
