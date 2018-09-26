@@ -220,6 +220,10 @@ validate_inputs() {
   if ! [ -d "${TARGET_DIR}" ] || ! [ -w "${TARGET_DIR}" ]; then
     error "TARGET_DIR '${TARGET_DIR}' is not a writable directory."
   fi
+
+  if ! [ "$( jq -r type "${CWD}/decomposer.json" 2> /dev/null )" = 'object' ]; then
+    error 'decomposer.json is not a valid JSON object'
+  fi
 }
 
 decomposer_run() {

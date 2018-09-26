@@ -68,3 +68,21 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[0]}" = "decomposer: TARGET_DIR '${TARGET_DIR}' is not a writable directory." ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
+
+@test "${SUITE_NAME}: decomposer.json doesn't contain JSON content" {
+  create_decomposer_json not_json_content
+
+  run_decomposer develop
+  [ "${status}" -eq 1 ]
+  [ "${lines[0]}" = "decomposer: decomposer.json is not a valid JSON object" ]
+  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+}
+
+@test "${SUITE_NAME}: decomposer.json doesn't contain JSON object" {
+  create_decomposer_json not_json_object
+
+  run_decomposer develop
+  [ "${status}" -eq 1 ]
+  [ "${lines[0]}" = "decomposer: decomposer.json is not a valid JSON object" ]
+  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+}
