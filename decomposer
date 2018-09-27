@@ -156,6 +156,11 @@ decomposer_process_file() {
 
     printf 'Installing %s...' "${name}"
 
+    if ! decomposer_validate_library "${object}" status_text; then
+      printf 'failed (invalid definition: %s)\n' "${status_text}"
+      continue
+    fi
+
     decomposer_install_library "${name}" "${object}" status_text
 
     case "$?" in
@@ -166,6 +171,64 @@ decomposer_process_file() {
 
     decomposer_create_library_autoload "${name}" "${object}"
   done
+}
+
+decomposer_validate_library() {
+  local object="$1"
+  local status_text_variable="$2"
+
+  if ! [ "$( jq -r type <<< "${object}" )" = 'object' ]; then
+    printf -v "${status_text_variable}" 'not an object'
+    return 1
+  fi
+
+  if ! [ "$( jq -r '.url|type' <<< "${object}" )" = 'string' ]; then
+    printf -v "${status_text_variable}" 'invalid url'
+    return 1
+  fi
+
+  if ! [ "$( jq -r '.version|type' <<< "${object}" )" = 'string' ]; then
+    printf -v "${status_text_variable}" 'invalid version'
+    return 1
+  fi
+
+  if [ "$( jq 'has("revision")' <<< "${object}" )" = 'true' ] \
+    && ! [ "$( jq -r '.revision|type' <<< "${object}" )" = 'string' ]; then
+    printf -v "${status_text_variable}" 'invalid revision'
+    return 1
+  fi
+
+  if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ] \
+    && ! [ "$( jq -r '."target-dir"|type' <<< "${object}" )" = 'string' ]; then
+    printf -v "${status_text_variable}" 'invalid target-dir'
+    return 1
+  fi
+
+  local has_psr0=$( jq 'has("psr0")' <<< "${object}" )
+  local has_psr4=$( jq 'has("psr4")' <<< "${object}" )
+
+  if [ "${has_psr0}" = 'false' ] && [ "${has_psr4}" = 'false' ]; then
+    printf -v "${status_text_variable}" 'missing psr0 or psr4'
+    return 1
+  fi
+
+  if [ "${has_psr0}" = 'true' ] && [ "${has_psr4}" = 'true' ]; then
+    printf -v "${status_text_variable}" 'conflicting psr0 and psr4'
+    return 1
+  fi
+
+  if [ "${has_psr0}" = 'true' ]; then
+    if ! [ "$( jq -r '.psr0."path"|type' <<< "${object}" )" = 'string' ]; then
+      printf -v "${status_text_variable}" 'invalid psr0'
+      return 1
+    fi
+  elif [ "${has_psr4}" = 'true' ]; then
+    if ! [ "$( jq -r '.psr4."prefix"|type' <<< "${object}" )" = 'string' ] \
+      || ! [ "$( jq -r '.psr4."search-path"|type' <<< "${object}" )" = 'string' ]; then
+      printf -v "${status_text_variable}" 'invalid psr4'
+      return 1
+    fi
+  fi
 }
 
 md5checksum() {
@@ -204,9 +267,10 @@ EOF
   fi
 
   for library in ${libraries}; do
-    local version=$( jq -r ".\"${library}\".version" "${file}" )
-
-    printf "require_once '%s-%s.php';\\n" "${library}" "${version}" >> "${autoload}"
+    if [ "$( jq -r ".\"${library}\".\"version\"|type" "${file}" )" = 'string' ]; then
+      local version=$( jq -r ".\"${library}\".version" "${file}" 2> /dev/null )
+      printf "require_once '%s-%s.php';\\n" "${library}" "${version}" >> "${autoload}"
+    fi
   done
 
   printf '\n?>\n' >> "${autoload}"

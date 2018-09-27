@@ -1,0 +1,8 @@
+"Beta": {
+    "url": {},
+    "revision": "master",
+    "version": "1.0",
+    "psr0": {
+        "path": "/src/beta/"
+    }
+}
