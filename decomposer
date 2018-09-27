@@ -31,10 +31,12 @@ decomposer_install_library() {
   local object="$2"
   local status_text_variable="$3"
 
-  local url=$( jq -r '.url' <<< "${object}" )
-  local version=$( jq -r '.version' <<< "${object}" )
+  local url version library_target_dir
 
-  local library_target_dir="${name}-${version}"
+  url=$( jq -r '.url' <<< "${object}" )
+  version=$( jq -r '.version' <<< "${object}" )
+
+  library_target_dir="${name}-${version}"
   if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ]; then
     library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
   fi
@@ -71,15 +73,17 @@ decomposer_install_library() {
     fi
   fi
 
+  local revision revision_type revision_alt_type revision_reset
+
   if [ "$( jq 'has("revision")' <<< "${object}" )" = 'true' ]; then
-    local revision=$( jq -r '.revision' <<< "${object}" )
+    revision=$( jq -r '.revision' <<< "${object}" )
   else
-    local revision="${version}"
+    revision="${version}"
   fi
 
-  local revision_type=$( git cat-file -t "${revision}" 2> /dev/null )
-  local revision_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
-  local revision_reset=
+  revision_type=$( git cat-file -t "${revision}" 2> /dev/null )
+  revision_alt_type=$( git cat-file -t "v${revision}" 2> /dev/null )
+  revision_reset=
 
   if git branch -a | grep -q "/origin/${revision}"; then
     revision_reset="origin/${revision}"
@@ -109,17 +113,21 @@ decomposer_create_library_autoload() {
   local name="$1"
   local object="$2"
 
-  local version=$( jq -r '.version' <<< "${object}" )
+  local version library_target_dir
 
-  local library_target_dir="${name}-${version}"
+  version=$( jq -r '.version' <<< "${object}" )
+
+  library_target_dir="${name}-${version}"
   if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ]; then
     library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
   fi
 
   cd "${TARGET_DIR}"
 
+  local psr0_path psr4_prefix psr4_path
+
   if [ "$( jq 'has("psr0")' <<< "${object}" )" = 'true' ]; then
-    local psr0_path=$( jq -r '.psr0.path' <<< "${object}" )
+    psr0_path=$( jq -r '.psr0.path' <<< "${object}" )
 
     cat << EOF > "${name}-${version}.php"
 <?php
@@ -132,8 +140,8 @@ set_include_path(
 ?>
 EOF
   elif [ "$( jq 'has("psr4")' <<< "${object}" )" = 'true' ]; then
-    local psr4_prefix=$( jq -r '.psr4.prefix' <<< "${object}" )
-    local psr4_path=$( jq -r '.psr4."search-path"' <<< "${object}" )
+    psr4_prefix=$( jq -r '.psr4.prefix' <<< "${object}" )
+    psr4_path=$( jq -r '.psr4."search-path"' <<< "${object}" )
 
     cat << EOF > "${name}-${version}.php"
 <?php
@@ -148,11 +156,12 @@ EOF
 decomposer_process_file() {
   local file="$1"
 
-  local libraries_names=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
+  local libraries_names status_text object
+
+  libraries_names=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
 
   for name in ${libraries_names}; do
-    local status_text
-    local object=$( jq ".\"${name}\"" "${file}")
+    object=$( jq ".\"${name}\"" "${file}")
 
     printf 'Installing %s...' "${name}"
 
@@ -204,8 +213,10 @@ decomposer_validate_library() {
     return 1
   fi
 
-  local has_psr0=$( jq 'has("psr0")' <<< "${object}" )
-  local has_psr4=$( jq 'has("psr4")' <<< "${object}" )
+  local has_psr0 has_psr4
+
+  has_psr0=$( jq 'has("psr0")' <<< "${object}" )
+  has_psr4=$( jq 'has("psr4")' <<< "${object}" )
 
   if [ "${has_psr0}" = 'false' ] && [ "${has_psr4}" = 'false' ]; then
     printf -v "${status_text_variable}" 'missing psr0 or psr4'
@@ -248,13 +259,15 @@ decomposer_create_project_autoload() {
   local file="$1"
   local include_outdated_check="$2"
 
-  local libraries=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
-  local autoload="${CWD}/decomposer.autoload.inc.php"
+  local libraries autoload md5 version
+
+  libraries=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
+  autoload="${CWD}/decomposer.autoload.inc.php"
 
   printf '<?php\n\n' > "${autoload}"
 
   if [ -n "${include_outdated_check}" ]; then
-    local md5=$( md5checksum "${CWD}/decomposer.json" )
+    md5=$( md5checksum "${CWD}/decomposer.json" )
 
     cat << EOF >> "${autoload}"
 if (md5_file(__DIR__ . '/decomposer.json') != '${md5}')
@@ -268,7 +281,7 @@ EOF
 
   for library in ${libraries}; do
     if [ "$( jq -r ".\"${library}\".\"version\"|type" "${file}" )" = 'string' ]; then
-      local version=$( jq -r ".\"${library}\".version" "${file}" 2> /dev/null )
+      version=$( jq -r ".\"${library}\".version" "${file}" 2> /dev/null )
       printf "require_once '%s-%s.php';\\n" "${library}" "${version}" >> "${autoload}"
     fi
   done
