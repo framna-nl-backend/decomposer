@@ -35,7 +35,7 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
 
-@test "${SUITE_NAME}: target dir doesn't exist" {
+@test "${SUITE_NAME}: target directory doesn't exist" {
   create_decomposer_json alpha_psr4
 
   export TARGET_DIR='/xxx'
@@ -46,7 +46,7 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
 
-@test "${SUITE_NAME}: target dir is a file" {
+@test "${SUITE_NAME}: target directory is a file" {
   create_decomposer_json alpha_psr4
 
   export TARGET_DIR="${TEST_TMP_DIR}/file"
@@ -58,7 +58,7 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
 
-@test "${SUITE_NAME}: target dir is not writable" {
+@test "${SUITE_NAME}: target directory is not writable" {
   create_decomposer_json alpha_psr4
 
   chmod -w "${TARGET_DIR}"

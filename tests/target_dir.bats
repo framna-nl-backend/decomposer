@@ -8,7 +8,7 @@ load helpers/assertions
 
 SUITE_NAME=$( test_suite_name )
 
-@test "${SUITE_NAME}: single new PSR0 lib" {
+@test "${SUITE_NAME}: single new PSR-0 library" {
   create_decomposer_json beta_psr0_target_dir
 
   local beta_lib_revision_hash="$( create_repository beta-lib )"

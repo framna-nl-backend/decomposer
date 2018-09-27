@@ -8,7 +8,7 @@ load helpers/assertions
 
 SUITE_NAME=$( test_suite_name )
 
-@test "${SUITE_NAME}: single new PSR4 lib" {
+@test "${SUITE_NAME}: single new PSR-4 library" {
   create_decomposer_json alpha_psr4
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -24,7 +24,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: single new PSR0 lib" {
+@test "${SUITE_NAME}: single new PSR-0 library" {
   create_decomposer_json beta_psr0
 
   local beta_lib_revision_hash="$( create_repository beta-lib )"
@@ -40,7 +40,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Beta-1.0
 }
 
-@test "${SUITE_NAME}: multiple new libs" {
+@test "${SUITE_NAME}: multiple new libraries" {
   create_decomposer_json alpha_psr4 beta_psr0
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -60,12 +60,12 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0 Beta-1.0
 }
 
-@test "${SUITE_NAME}: overwrite existing lib autoload file" {
+@test "${SUITE_NAME}: overwrite existing library autoload file" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
 
-  # create existing lib autoload file with wrong data
+  # create existing library autoload file with wrong data
   create_lib_autoload_file Alpha-1.0 beta_psr0
 
   run_decomposer install
@@ -90,7 +90,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: existing lib fetch new tag" {
+@test "${SUITE_NAME}: existing library fetches new tag" {
   create_decomposer_json alpha_tag_version
 
   create_repository alpha-lib
@@ -115,7 +115,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing lib fetch new annotated tag" {
+@test "${SUITE_NAME}: existing library fetches new annotated tag" {
   create_decomposer_json alpha_tag_version
 
   create_repository alpha-lib
@@ -140,7 +140,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing lib fetch new branch" {
+@test "${SUITE_NAME}: existing library fetches new branch" {
   create_decomposer_json alpha_branch_revision
 
   create_repository alpha-lib
@@ -165,7 +165,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${branch_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing lib fetch new commits" {
+@test "${SUITE_NAME}: existing library fetches new commits" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib

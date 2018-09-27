@@ -8,7 +8,7 @@ load helpers/assertions
 
 SUITE_NAME=$( test_suite_name )
 
-@test "${SUITE_NAME}: single new PSR4 lib" {
+@test "${SUITE_NAME}: single new PSR-4 library" {
   create_decomposer_json alpha_psr4
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -24,7 +24,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_develop_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: single new PSR0 lib" {
+@test "${SUITE_NAME}: single new PSR-0 library" {
   create_decomposer_json beta_psr0
 
   local beta_lib_revision_hash="$( create_repository beta-lib )"
@@ -40,7 +40,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_develop_file Beta-1.0
 }
 
-@test "${SUITE_NAME}: multiple new libs" {
+@test "${SUITE_NAME}: multiple new libraries" {
   create_decomposer_json alpha_psr4 beta_psr0
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"

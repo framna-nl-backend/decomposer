@@ -96,7 +96,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0 Beta-1.0 Gamma-1.0
 }
 
-@test "${SUITE_NAME}: revision points to a blob object" {
+@test "${SUITE_NAME}: revision is a blob object" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
   local beta_lib_revision_hash="$( create_repository beta-lib )"
   local gamma_lib_revision_hash="$( create_repository gamma-lib )"
@@ -124,7 +124,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0 Beta-1.0 Gamma-1.0
 }
 
-@test "${SUITE_NAME}: revision points to a tree object" {
+@test "${SUITE_NAME}: revision is a tree object" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
   local beta_lib_revision_hash="$( create_repository beta-lib )"
   local gamma_lib_revision_hash="$( create_repository gamma-lib )"
