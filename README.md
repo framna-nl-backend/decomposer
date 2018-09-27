@@ -85,13 +85,15 @@ decomposer.json
 The content of `decomposer.json` is a JSON object, where the key is the name of the library and the value is another
 JSON object holding the configuration. The following keys are supporting within configuration:
 
-* url - The git clone URL for the library
-* version - The version of the library (This should map a tag with either the same name or in the form of 'v{version}',
+* url (required) - The git clone URL for the library
+* version (required) - The version of the library (This should map a tag with either the same name or in the form of 'v{version}',
             unless revision is specified as well. In that case this is merely used as an identifier)
-* revision - Can be used to install a specific branch/commit
-* target-dir - Can be used to clone the library to a specific subdirectory in order to satisfy autoloading structure
-* psr0 - Autoloader configuration using [PSR-0](https://www.php-fig.org/psr/psr-0/)
-* psr4 - Autoloader configuration using [PSR-4](https://www.php-fig.org/psr/psr-4/)
+* revision (optional) - Can be used to install a specific branch/commit
+* target-dir (optional) - Can be used to clone the library to a specific subdirectory in order to satisfy autoloading structure
+* psr0 (optional) - Autoloader configuration using [PSR-0](https://www.php-fig.org/psr/psr-0/)
+* psr4 (optional) - Autoloader configuration using [PSR-4](https://www.php-fig.org/psr/psr-4/)
+
+Either the `psr0` or the `psr4` field should be present.
 
 The `psr-0` configuration contains one setting `path`, that holds the relative path from the libraries repository root
 where the PHP libraries are located.
