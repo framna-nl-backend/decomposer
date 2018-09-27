@@ -41,7 +41,7 @@ decomposer_install_library() {
     library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
   fi
 
-  cd "${TARGET_DIR}"
+  cd "${TARGET_DIR}" || return 2
 
   if ! [ -d "${name}-${version}" ]; then
     if ! git clone "${url}" "${library_target_dir}" &> /dev/null; then
@@ -63,7 +63,7 @@ decomposer_install_library() {
     return 2
   fi
 
-  cd "${library_target_dir}"
+  cd "${library_target_dir}" || return 2
 
   if [ -z "${just_cloned}" ]; then
     # no need to fetch changes if we just cloned the repository
@@ -122,7 +122,7 @@ decomposer_create_library_autoload() {
     library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
   fi
 
-  cd "${TARGET_DIR}"
+  cd "${TARGET_DIR}" || return 1
 
   local psr0_path psr4_prefix psr4_path
 
