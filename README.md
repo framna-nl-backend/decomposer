@@ -30,6 +30,10 @@ Usage
 
 Decomposer currently supports these commands:
 
+  `decomposer help`
+
+  > Display help
+
   `decomposer install`
 
   > Installs all the libraries listed in `decomposer.json` and generates the include file.
