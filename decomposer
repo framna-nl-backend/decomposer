@@ -185,6 +185,20 @@ decomposer_process_file() {
 decomposer_validate_library() {
   local object="$1"
   local status_text_variable="$2"
+  local conditions
+
+  conditions="(type == \"object\")"
+  conditions="$conditions and (.url|type == \"string\")"
+  conditions="$conditions and (.version|type == \"string\")"
+  conditions="$conditions and (if has(\"revision\") then (.revision|type == \"string\") else true end)"
+  conditions="$conditions and (if has(\"target-dir\") then (.\"target-dir\"|type == \"string\") else true end)"
+  conditions="$conditions and ((has(\"psr0\") or has(\"psr4\")) and (has(\"psr0\") and has(\"psr4\") | not))"
+  conditions="$conditions and (if has(\"psr0\") then (.psr0.\"path\"|type == \"string\") else true end)"
+  conditions="$conditions and (if has(\"psr4\") then (.psr4.\"prefix\"|type == \"string\") and (.psr4.\"search-path\"|type == \"string\") else true end)"
+
+  if [ "$( jq -r "$conditions" <<< "${object}")" = 'true' ]; then
+    return 0
+  fi
 
   if ! [ "$( jq -r type <<< "${object}" )" = 'object' ]; then
     printf -v "${status_text_variable}" 'not an object'
