@@ -36,9 +36,11 @@ decomposer_install_library() {
   url=$( jq -r '.url' <<< "${object}" )
   version=$( jq -r '.version' <<< "${object}" )
 
-  library_target_dir="${name}-${version}"
-  if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ]; then
-    library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
+  library_target_dir=$( jq -r '."target-dir"' <<< "${object}" )
+  if [ "${library_target_dir}" = "null" ]; then
+    library_target_dir="${name}-${version}"
+  else
+    library_target_dir="${name}-${version}${library_target_dir}"
   fi
 
   cd "${TARGET_DIR}" || return 2
@@ -117,9 +119,11 @@ decomposer_create_library_autoload() {
 
   version=$( jq -r '.version' <<< "${object}" )
 
-  library_target_dir="${name}-${version}"
-  if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ]; then
-    library_target_dir+=$( jq -r '."target-dir"' <<< "${object}" )
+  library_target_dir=$( jq -r '."target-dir"' <<< "${object}" )
+  if [ "${library_target_dir}" = "null" ]; then
+    library_target_dir="${name}-${version}"
+  else
+    library_target_dir="${name}-${version}${library_target_dir}"
   fi
 
   cd "${TARGET_DIR}" || return 1
