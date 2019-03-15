@@ -188,3 +188,59 @@ SUITE_NAME=$( test_suite_name )
 
   assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
 }
+
+@test "${SUITE_NAME}: existing library doesn't fetch unrelated changes for commit" {
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
+
+  # create decomposer.json with current commit
+  export TEST_REPOS_COMMIT="${alpha_lib_revision_hash}"
+  create_decomposer_json alpha_commit_revision
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  # create new commit on top
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+
+  local commit_alpha_lib_revision_hash=$(
+    git -C "${TEST_REPOS_DIR}/alpha-lib" \
+      rev-parse HEAD
+  )
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
+  ! assert_lib_contains  Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+}
+
+@test "${SUITE_NAME}: existing library doesn't fetch unrelated changes for tag" {
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
+
+  # create decomposer.json
+  create_decomposer_json alpha_tag_revision
+
+  # tag current HEAD
+  git -C "${TEST_REPOS_DIR}/alpha-lib" tag alpha-lib-1.0 -a -m 'tag'
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  # create new commit on top
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+
+  local commit_alpha_lib_revision_hash=$(
+    git -C "${TEST_REPOS_DIR}/alpha-lib" \
+      rev-parse HEAD
+  )
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
+  ! assert_lib_contains  Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+}

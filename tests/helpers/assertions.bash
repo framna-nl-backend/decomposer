@@ -25,6 +25,20 @@ assert_lib_installed() {
   [ "${expected_head_hash}" == "${result_head_hash}" ]
 }
 
+assert_lib_contains() {
+  local lib_name_version="$1"
+  local revision="$2"
+
+  [ -d "${TARGET_DIR}/${lib_name_version}" ]
+
+  local object_type=$(
+    git -C "${TARGET_DIR}/${lib_name_version}" \
+      cat-file -t "${revision}" 2> /dev/null
+  )
+
+  [ -n "${object_type}" ]
+}
+
 assert_lib_autoload_file() {
   local lib_name_version="$1"
   local fixture_name="$2"
