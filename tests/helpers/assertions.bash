@@ -76,6 +76,28 @@ assert_project_autoload_file() {
   [ "${expected_content}" == "${result_content}" ]
 }
 
+assert_changelog_file() {
+  local changelog_name="$1"
+  local fixture_name="$2"
+
+  [ -f "${TEST_WORKING_DIR}/${changelog_name}" ]
+
+  local expected_content=$(
+    cat "${TEST_FIXTURES_DIR}/changelog/${fixture_name}"
+  )
+
+  local result_content=$(
+    cat "${TEST_WORKING_DIR}/${changelog_name}"
+  )
+
+  if [ "$expected_content" != "$result_content" ]; then
+    diff -u "${TEST_FIXTURES_DIR}/changelog/${fixture_name}" "${TEST_WORKING_DIR}/${changelog_name}"
+    return 1
+  fi
+
+  return 0
+}
+
 assert_project_autoload_develop_file() {
   local lib_name_versions="$@"
 

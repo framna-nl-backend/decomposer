@@ -47,6 +47,8 @@ The extra check is mainly useful on a development environment to get warned to r
 project's last pull of changes updated the `decomposer.json` file. It should not be necessary on a controlled
 production environment. Not having it there is saving some unnecessary computing for every process.
 
+For both install methods the `-c FILE / --changelog=FILE` option can be passed. This will create a file containing the changes in the dependencies in markdown format, the argument being used to specify the location. If no location is provided decomposer falls back to `decomposer.diffnotes.md` as the target.
+
 Install location of libraries is controlled using the environment variable `TARGET_DIR`. By default this is
 `/var/www/libs`.
 

@@ -3,6 +3,8 @@
 CWD=$( pwd )
 TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
 SCRIPT_NAME=${0##*/}
+GENERATE_CHANGELOG=0
+CHANGELOG_FILE=${CWD}/decomposer.diffnotes.md
 
 usage() {
   cat << EOF
@@ -123,7 +125,22 @@ decomposer_install_library() {
     printf -v "${status_text_variable}" 'resetting changes failed'
     return 1
   fi
+
+  if [ $GENERATE_CHANGELOG == 1 ]; then
+    decomposer_write_changelog
+  fi
 }
+
+decomposer_write_changelog() {
+  BASE=$(git reflog | head -n 2 | tail -n 1 | cut -d " " -f 1)
+
+  printf "# %s:\n" "$name"
+  printf "## Added:\n"
+  git cherry -v "$BASE" HEAD | cut -d " " -f 3-
+  printf "\n## Removed:\n"
+  git cherry -v HEAD "$BASE" | cut -d " " -f 3-
+  printf "\n"
+} >> "${CHANGELOG_FILE}"
 
 decomposer_create_library_autoload() {
   local name="$1"
@@ -333,6 +350,13 @@ validate_inputs() {
   if ! [ "$( jq -r type "${CWD}/decomposer.json" 2> /dev/null )" = 'object' ]; then
     error 'decomposer.json is not a valid JSON object'
   fi
+
+  # Clear changelog and test write
+  if [ $GENERATE_CHANGELOG == 1 ]; then
+    if ! printf '' 2> /dev/null > "${CHANGELOG_FILE}"; then
+      error "Changelog file '${CHANGELOG_FILE}' is not writable."
+    fi
+  fi
 }
 
 decomposer_run() {
@@ -341,24 +365,49 @@ decomposer_run() {
   validate_inputs
   decomposer_process_file "${CWD}/decomposer.json"
   decomposer_create_project_autoload "${CWD}/decomposer.json" "${include_outdated_check}"
+
+  if [ $GENERATE_CHANGELOG == 1 ]; then
+    printf "\nWrote changelog to %s\n" "${CHANGELOG_FILE}"
+  fi
 }
 
-COMMAND="$1"
+parse_arguments() {
+  COMMAND=$1
+  shift
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      "-c" | "--changelog")
+        GENERATE_CHANGELOG=1
+        if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+          CHANGELOG_FILE="$2"
+          shift
+        fi
+        ;;
+      *)
+        printf "Unknown option %s" "$1"
+        [ ${2:0:1} != "-" ] && shift
+        ;;
+    esac
+    shift
+  done
 
-case "${COMMAND}" in
-  'install')
-    decomposer_run
-    ;;
-  'develop')
-    decomposer_run include_outdated_check
-    ;;
-  'help')
-    usage
-    exit
-    ;;
-  '')
-    error 'Missing command'
-    ;;
-  *)
-    error 'Invalid command'
-esac
+  case "${COMMAND}" in
+    'install')
+      decomposer_run
+      ;;
+    'develop')
+      decomposer_run include_outdated_check
+      ;;
+    'help')
+      usage
+      exit
+      ;;
+    '')
+      error 'Missing command'
+      ;;
+    *)
+      error 'Invalid command'
+  esac
+}
+
+parse_arguments "$@"

@@ -86,3 +86,27 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[0]}" = "decomposer: decomposer.json is not a valid JSON object" ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
+
+@test "${SUITE_NAME}: changelog pointing to inaccessible location" {
+  create_decomposer_json alpha_psr4
+
+  run_decomposer install --changelog '/root/changelog.fail'
+  [ "${status}" -eq 1 ]
+  echo ${lines[0]}
+  [ "${lines[0]}" = "decomposer: Changelog file '/root/changelog.fail' is not writable." ]
+
+  [[ ! -f "/root/changelog.fail" ]]
+}
+
+@test "${SUITE_NAME}: changelog pointing to inaccessible file" {
+  create_decomposer_json alpha_psr4
+
+  touch "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
+  chmod -w "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
+
+  run_decomposer install --changelog "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
+  [ "${status}" -eq 1 ]
+
+  local error_msg="decomposer: Changelog file '${TEST_WORKING_DIR}/decomposer.diffnotes.md' is not writable."
+  [ "${lines[0]}" = "${error_msg}" ]
+}
