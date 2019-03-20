@@ -1,0 +1,10 @@
+# ReviewBoard Configuration for Decomposer
+
+# Repository name
+REPOSITORY = "Decomposer"
+
+# ReviewBoard Server URL
+REVIEWBOARD_URL = "http://reviews.m2mobi.com"
+
+# Review Group
+TARGET_GROUPS = "sysadmin"
