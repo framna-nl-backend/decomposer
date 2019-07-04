@@ -1,9 +1,0 @@
-"Beta": {
-    "url": "${TEST_REPOS_DIR}/beta-lib",
-    "revision": "master",
-    "version": "1.0",
-    "psr4": {
-        "prefix": {},
-        "search-path": "/src/beta/"
-    }
-}

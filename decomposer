@@ -175,8 +175,9 @@ set_include_path(
 ?>
 EOF
   elif [ "$( jq 'has("psr4")' <<< "${object}" )" = 'true' ]; then
-    psr4_prefix=$( jq -r '.psr4.prefix' <<< "${object}" )
-    psr4_path=$( jq -r '.psr4."search-path"' <<< "${object}" )
+    if [ "$( jq -r '.psr4|type' <<< "${object}" )" = 'object' ]; then
+      psr4_prefix=$( jq -r '.psr4.prefix' <<< "${object}" )
+      psr4_path=$( jq -r '.psr4."search-path"' <<< "${object}" )
 
     cat << EOF > "${name}-${version}.php"
 <?php
@@ -185,6 +186,18 @@ autoload_register_psr4_prefix('${psr4_prefix}', '${name}-${version}${psr4_path}'
 
 ?>
 EOF
+    else
+      printf '<?php\n\n' > "${name}-${version}.php"
+
+      for psr4_config in $( jq -c '.psr4[]' <<< "${object}" ); do
+        psr4_prefix=$( jq -r '.prefix' <<< "${psr4_config}" )
+        psr4_path=$( jq -r '."search-path"' <<< "${psr4_config}" )
+        echo "autoload_register_psr4_prefix('${psr4_prefix}', '${name}-${version}${psr4_path}');" \
+          >> "${name}-${version}.php"
+      done
+
+      printf '\n?>' >> "${name}-${version}.php"
+    fi
   fi
 }
 
@@ -228,8 +241,6 @@ decomposer_validate_library() {
   conditions="$conditions and (if has(\"revision\") then (.revision|type == \"string\") else true end)"
   conditions="$conditions and (if has(\"target-dir\") then (.\"target-dir\"|type == \"string\") else true end)"
   conditions="$conditions and ((has(\"psr0\") or has(\"psr4\")) and (has(\"psr0\") and has(\"psr4\") | not))"
-  conditions="$conditions and (if has(\"psr0\") then (.psr0.\"path\"|type == \"string\") else true end)"
-  conditions="$conditions and (if has(\"psr4\") then (.psr4.\"prefix\"|type == \"string\") and (.psr4.\"search-path\"|type == \"string\") else true end)"
 
   if [ "$( jq -r "$conditions" <<< "${object}")" = 'true' ]; then
     return 0
@@ -275,19 +286,6 @@ decomposer_validate_library() {
   if [ "${has_psr0}" = 'true' ] && [ "${has_psr4}" = 'true' ]; then
     printf -v "${status_text_variable}" 'conflicting psr0 and psr4'
     return 1
-  fi
-
-  if [ "${has_psr0}" = 'true' ]; then
-    if ! [ "$( jq -r '.psr0."path"|type' <<< "${object}" )" = 'string' ]; then
-      printf -v "${status_text_variable}" 'invalid psr0'
-      return 1
-    fi
-  elif [ "${has_psr4}" = 'true' ]; then
-    if ! [ "$( jq -r '.psr4."prefix"|type' <<< "${object}" )" = 'string' ] \
-      || ! [ "$( jq -r '.psr4."search-path"|type' <<< "${object}" )" = 'string' ]; then
-      printf -v "${status_text_variable}" 'invalid psr4'
-      return 1
-    fi
   fi
 }
 

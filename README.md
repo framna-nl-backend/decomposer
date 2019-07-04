@@ -106,6 +106,7 @@ where the PHP libraries are located.
 
 The `psr-4` configuration contains `prefix`, which holds the namespace prefix to register with PSR-4, as well as
 `search-path`, which holds the relative path from the libraries repository root where the PHP libraries are located.
+The `psr-4` configuration can also be an array of such objects in case multiple prefixes or search paths are needed.
 
 Tests
 ===
