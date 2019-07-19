@@ -53,12 +53,12 @@ SUITE_NAME=$( test_suite_name )
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_changelog_file decomposer.diffnotes.md changelog_default
+  assert_changelog_file "${TEST_WORKING_DIR}/decomposer.diffnotes.md" changelog_default
 
   assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing library fetches new commits and writes custom log" {
+@test "${SUITE_NAME}: existing library fetches new commits and writes custom log, absolute path" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -75,11 +75,39 @@ SUITE_NAME=$( test_suite_name )
       rev-parse HEAD
   )
 
-  run_decomposer install --changelog ${TEST_WORKING_DIR}/test.file
+  run_decomposer install --changelog "${TEST_WORKING_DIR}/test.file"
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_changelog_file test.file changelog_default
+  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_default
+
+  assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+}
+
+@test "${SUITE_NAME}: existing library fetches new commits and writes custom log, relative path" {
+  create_decomposer_json alpha_psr4
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  # create new commit in repository
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+
+  local commit_alpha_lib_revision_hash=$(
+    git -C "${TEST_REPOS_DIR}/alpha-lib" \
+      rev-parse HEAD
+  )
+
+  mkdir "${TEST_WORKING_DIR}/changelogs"
+
+  run_decomposer install --changelog changelogs/test.file
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_changelog_file "${TEST_WORKING_DIR}/changelogs/test.file" changelog_default
 
   assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
 }
@@ -98,9 +126,9 @@ SUITE_NAME=$( test_suite_name )
   git -C "${TARGET_DIR}/Alpha-1.0" commit \
     --allow-empty --message 'branched commit'
 
-  run_decomposer install --changelog ${TEST_WORKING_DIR}/test.file
+  run_decomposer install --changelog "${TEST_WORKING_DIR}/test.file"
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_changelog_file test.file changelog_deleted
+  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_deleted
 }

@@ -77,21 +77,21 @@ assert_project_autoload_file() {
 }
 
 assert_changelog_file() {
-  local changelog_name="$1"
+  local changelog_file="$1"
   local fixture_name="$2"
 
-  [ -f "${TEST_WORKING_DIR}/${changelog_name}" ]
+  [ -f "${changelog_file}" ]
 
   local expected_content=$(
     cat "${TEST_FIXTURES_DIR}/changelog/${fixture_name}"
   )
 
   local result_content=$(
-    cat "${TEST_WORKING_DIR}/${changelog_name}"
+    cat "${changelog_file}"
   )
 
-  if [ "$expected_content" != "$result_content" ]; then
-    diff -u "${TEST_FIXTURES_DIR}/changelog/${fixture_name}" "${TEST_WORKING_DIR}/${changelog_name}"
+  if [ "${expected_content}" != "${result_content}" ]; then
+    diff -u "${TEST_FIXTURES_DIR}/changelog/${fixture_name}" "${changelog_file}"
     return 1
   fi
 

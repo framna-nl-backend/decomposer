@@ -14,8 +14,8 @@ Manage a PHP project libraries
 Rely on decomposer.json file in working directory
 
 Commands:
-  install    install all the libraries
-             and generate an include file
+  install    install all the libraries and generate an include file
+             -c --changelog [FILE] generate a changelog from last installation
   develop    same as install
              add an extra check to error out if include file is outdated
   help       display this message
@@ -126,19 +126,20 @@ decomposer_install_library() {
     return 1
   fi
 
-  if [ $GENERATE_CHANGELOG == 1 ]; then
+  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
     decomposer_write_changelog
   fi
 }
 
 decomposer_write_changelog() {
-  BASE=$(git reflog | head -n 2 | tail -n 1 | cut -d " " -f 1)
+  local base
+  base=$( git reflog | head -n 2 | tail -n 1 | cut -d " " -f 1 )
 
-  printf "# %s:\n" "$name"
+  printf "# %s:\n" "${name}"
   printf "## Added:\n"
-  git cherry -v "$BASE" HEAD | cut -d " " -f 3-
+  git cherry -v "${base}" HEAD | cut -d " " -f 3-
   printf "\n## Removed:\n"
-  git cherry -v HEAD "$BASE" | cut -d " " -f 3-
+  git cherry -v HEAD "${base}" | cut -d " " -f 3-
   printf "\n"
 } >> "${CHANGELOG_FILE}"
 
@@ -350,7 +351,7 @@ validate_inputs() {
   fi
 
   # Clear changelog and test write
-  if [ $GENERATE_CHANGELOG == 1 ]; then
+  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
     if ! printf '' 2> /dev/null > "${CHANGELOG_FILE}"; then
       error "Changelog file '${CHANGELOG_FILE}' is not writable."
     fi
@@ -364,7 +365,7 @@ decomposer_run() {
   decomposer_process_file "${CWD}/decomposer.json"
   decomposer_create_project_autoload "${CWD}/decomposer.json" "${include_outdated_check}"
 
-  if [ $GENERATE_CHANGELOG == 1 ]; then
+  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
     printf "\nWrote changelog to %s\n" "${CHANGELOG_FILE}"
   fi
 }
@@ -377,7 +378,10 @@ parse_arguments() {
       "-c" | "--changelog")
         GENERATE_CHANGELOG=1
         if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-          CHANGELOG_FILE="$2"
+          case "$2" in
+            /*) CHANGELOG_FILE="$2" ;;
+            *) CHANGELOG_FILE="${CWD}/$2" ;;
+          esac
           shift
         fi
         ;;
