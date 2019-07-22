@@ -56,7 +56,7 @@ assert_lib_autoload_file() {
   [ "${expected_content}" == "${result_content}" ]
 }
 
-assert_project_autoload_file() {
+assert_project_autoload_file_without_check() {
   local lib_name_versions="$@"
 
   [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
@@ -98,7 +98,7 @@ assert_changelog_file() {
   return 0
 }
 
-assert_project_autoload_develop_file() {
+assert_project_autoload_file() {
   local lib_name_versions="$@"
 
   [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
@@ -109,8 +109,7 @@ assert_project_autoload_develop_file() {
 
 if (md5_file(__DIR__ . '/decomposer.json') != '$( md5checksum_decomposer_json )')
 {
-    die("Decomposer autoload file is outdated. Please re-run 'decomposer develop'
-");
+    die("Decomposer autoload file is outdated. Please re-run 'decomposer install'");
 }
 EOF
   )

@@ -28,19 +28,12 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
 
-@test "${SUITE_NAME}: develop without decomposer.json" {
-  run_decomposer develop
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: No decomposer.json found." ]
-  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
-}
-
 @test "${SUITE_NAME}: target directory doesn't exist" {
   create_decomposer_json alpha_psr4
 
   export TARGET_DIR='/xxx'
 
-  run_decomposer develop
+  run_decomposer install
   [ "${status}" -eq 1 ]
   [ "${lines[0]}" = "decomposer: TARGET_DIR '/xxx' is not a writable directory." ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
@@ -52,7 +45,7 @@ SUITE_NAME=$( test_suite_name )
   export TARGET_DIR="${TEST_TMP_DIR}/file"
   touch "${TEST_TMP_DIR}/file"
 
-  run_decomposer develop
+  run_decomposer install
   [ "${status}" -eq 1 ]
   [ "${lines[0]}" = "decomposer: TARGET_DIR '${TEST_TMP_DIR}/file' is not a writable directory." ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
@@ -63,7 +56,7 @@ SUITE_NAME=$( test_suite_name )
 
   chmod -w "${TARGET_DIR}"
 
-  run_decomposer develop
+  run_decomposer install
   [ "${status}" -eq 1 ]
   [ "${lines[0]}" = "decomposer: TARGET_DIR '${TARGET_DIR}' is not a writable directory." ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
@@ -72,7 +65,7 @@ SUITE_NAME=$( test_suite_name )
 @test "${SUITE_NAME}: decomposer.json doesn't contain JSON content" {
   create_decomposer_json not_json_content
 
-  run_decomposer develop
+  run_decomposer install
   [ "${status}" -eq 1 ]
   [ "${lines[0]}" = "decomposer: decomposer.json is not a valid JSON object" ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
@@ -81,7 +74,7 @@ SUITE_NAME=$( test_suite_name )
 @test "${SUITE_NAME}: decomposer.json doesn't contain JSON object" {
   create_decomposer_json not_json_object
 
-  run_decomposer develop
+  run_decomposer install
   [ "${status}" -eq 1 ]
   [ "${lines[0]}" = "decomposer: decomposer.json is not a valid JSON object" ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]

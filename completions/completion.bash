@@ -1,6 +1,6 @@
 if ((BASH_VERSINFO[0] < 4))
-then 
-  echo "Bash version too old for this decomposer completion." 
+then
+  echo "Bash version too old for this decomposer completion."
   return
 fi
 _decomposer()
@@ -9,22 +9,23 @@ _decomposer()
     local line=${COMP_LINE}
     compopt +o default
     case $line in
-      *develop*)
-		COMPREPLY=()
-		;;
       *install*)
-		COMPREPLY=()
-		;;
+        COMPREPLY=()
+        ;;
       *help*)
-		COMPREPLY=()
-		;;
+        COMPREPLY=()
+        ;;
       *-c*|*--changelog*)
         compopt -o default
         COMPREPLY=()
         ;;
+      *--no-dev*)
+        compopt -o default
+        COMPREPLY=()
+        ;;
       **)
-		COMPREPLY=( $(compgen -W 'install develop help -c --changelog' -- $curr_arg ) )
-		;;
-  	esac
+        COMPREPLY=( $(compgen -W 'install help -c --changelog --no-dev' -- $curr_arg ) )
+        ;;
+    esac
 } &&
 complete -F _decomposer decomposer

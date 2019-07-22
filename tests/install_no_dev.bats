@@ -4,7 +4,7 @@ load helpers/main
 load helpers/creations
 load helpers/assertions
 
-# This suite tests the "develop" command
+# This suite tests the "install" command with the --no-dev option
 
 SUITE_NAME=$( test_suite_name )
 
@@ -13,7 +13,7 @@ SUITE_NAME=$( test_suite_name )
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
-  run_decomposer develop
+  run_decomposer install --no-dev
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
 
@@ -21,7 +21,7 @@ SUITE_NAME=$( test_suite_name )
 
   assert_lib_autoload_file Alpha-1.0 alpha_psr4
 
-  assert_project_autoload_develop_file Alpha-1.0
+  assert_project_autoload_file_without_check Alpha-1.0
 }
 
 @test "${SUITE_NAME}: single new PSR-0 library" {
@@ -29,7 +29,7 @@ SUITE_NAME=$( test_suite_name )
 
   local beta_lib_revision_hash="$( create_repository beta-lib )"
 
-  run_decomposer develop
+  run_decomposer install --no-dev
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Beta...done" ]
 
@@ -37,7 +37,7 @@ SUITE_NAME=$( test_suite_name )
 
   assert_lib_autoload_file Beta-1.0 beta_psr0
 
-  assert_project_autoload_develop_file Beta-1.0
+  assert_project_autoload_file_without_check Beta-1.0
 }
 
 @test "${SUITE_NAME}: multiple new libraries" {
@@ -46,7 +46,7 @@ SUITE_NAME=$( test_suite_name )
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
   local beta_lib_revision_hash="$( create_repository beta-lib )"
 
-  run_decomposer develop
+  run_decomposer install --no-dev
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...done" ]
   [ "${lines[1]}" = "Installing Beta...done" ]
@@ -57,5 +57,5 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_autoload_file Alpha-1.0 alpha_psr4
   assert_lib_autoload_file Beta-1.0 beta_psr0
 
-  assert_project_autoload_develop_file Alpha-1.0 Beta-1.0
+  assert_project_autoload_file_without_check Alpha-1.0 Beta-1.0
 }

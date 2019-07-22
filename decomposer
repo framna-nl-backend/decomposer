@@ -5,10 +5,11 @@ TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
 SCRIPT_NAME=${0##*/}
 GENERATE_CHANGELOG=0
 CHANGELOG_FILE=${CWD}/decomposer.diffnotes.md
+INCLUDE_OUTDATED_CHECK=1
 
 usage() {
   cat << EOF
-usage: ${SCRIPT_NAME} <command>
+usage: ${SCRIPT_NAME} <command> [<options>]
 
 Manage a PHP project libraries
 Rely on decomposer.json file in working directory
@@ -16,8 +17,7 @@ Rely on decomposer.json file in working directory
 Commands:
   install    install all the libraries and generate an include file
              -c --changelog [FILE] generate a changelog from last installation
-  develop    same as install
-             add an extra check to error out if include file is outdated
+             --no-dev              meant for installation on production environment
   help       display this message
 EOF
 }
@@ -305,7 +305,6 @@ md5checksum() {
 
 decomposer_create_project_autoload() {
   local file="$1"
-  local include_outdated_check="$2"
 
   local libraries autoload md5 version
 
@@ -314,14 +313,13 @@ decomposer_create_project_autoload() {
 
   printf '<?php\n\n' > "${autoload}"
 
-  if [ -n "${include_outdated_check}" ]; then
+  if [ "${INCLUDE_OUTDATED_CHECK}" == 1 ]; then
     md5=$( md5checksum "${CWD}/decomposer.json" )
 
     cat << EOF >> "${autoload}"
 if (md5_file(__DIR__ . '/decomposer.json') != '${md5}')
 {
-    die("Decomposer autoload file is outdated. Please re-run 'decomposer develop'
-");
+    die("Decomposer autoload file is outdated. Please re-run 'decomposer install'");
 }
 
 EOF
@@ -359,11 +357,9 @@ validate_inputs() {
 }
 
 decomposer_run() {
-  local include_outdated_check="$1"
-
   validate_inputs
   decomposer_process_file "${CWD}/decomposer.json"
-  decomposer_create_project_autoload "${CWD}/decomposer.json" "${include_outdated_check}"
+  decomposer_create_project_autoload "${CWD}/decomposer.json"
 
   if [ "${GENERATE_CHANGELOG}" == 1 ]; then
     printf "\nWrote changelog to %s\n" "${CHANGELOG_FILE}"
@@ -385,6 +381,9 @@ parse_arguments() {
           shift
         fi
         ;;
+      "--no-dev")
+        INCLUDE_OUTDATED_CHECK=0
+        ;;
       *)
         printf "Unknown option %s\n" "$1"
         if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
@@ -398,9 +397,6 @@ parse_arguments() {
   case "${COMMAND}" in
     'install')
       decomposer_run
-      ;;
-    'develop')
-      decomposer_run include_outdated_check
       ;;
     'help')
       usage

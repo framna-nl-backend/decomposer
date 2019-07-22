@@ -38,16 +38,13 @@ Decomposer currently supports these commands:
 
   > Installs all the libraries listed in `decomposer.json` and generates the include file.
 
-  `decomposer develop`
-
-  > Same as `decomposer install`, but additionally also adds a check to the include file that returns an
-    error in case the include file is outdated.
-
-The extra check is mainly useful on a development environment to get warned to rerun `decomposer` after the
+The include file contains a check that returns an error in case it is outdated.
+This extra check is mainly useful on a development environment to get warned to rerun `decomposer` after the
 project's last pull of changes updated the `decomposer.json` file. It should not be necessary on a controlled
 production environment. Not having it there is saving some unnecessary computing for every process.
+On such a production environment, the `--no-dev` should be then used.
 
-For both install methods the `-c FILE / --changelog=FILE` option can be passed. This will create a file containing
+For the install command the `-c FILE / --changelog=FILE` option can be passed. This will create a file containing
 the changes in the dependencies and in the main project (since last installation) in markdown format.
 The optional FILE argument is used to specify the changelog file location. If no location is provided decomposer
 falls back to a `decomposer.diffnotes.md` file in the current working directory.
