@@ -382,8 +382,10 @@ parse_arguments() {
         fi
         ;;
       *)
-        printf "Unknown option %s" "$1"
-        [ ${2:0:1} != "-" ] && shift
+        printf "Unknown option %s\n" "$1"
+        if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+          shift
+        fi
         ;;
     esac
     shift
