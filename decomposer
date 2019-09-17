@@ -356,8 +356,33 @@ validate_inputs() {
   fi
 }
 
+decomposer_write_project_changelog() {
+  local base
+  local name
+  name=$( git config --get remote.origin.url | rev | cut -d "/" -f 1 | rev | sed "s|.git||" )
+  last=$( git reflog --pretty='%h' --since="5 minutes ago" --date=relative | head -n 1 )
+
+  if ! [ -z "${last}" ]; then
+    base=$(git show HEAD@{1} --pretty="%h" 2>/dev/null | head -n 1)
+  else
+    base=''
+  fi
+
+  printf "# %s:\n" "${name}"
+  printf "## Added:\n"
+  if ! [ -z "${base}" ]; then
+    git cherry -v "${base}" HEAD | cut -d " " -f 3-
+  fi
+  printf "\n## Removed:\n"
+  if ! [ -z "${base}" ]; then
+    git cherry -v HEAD "${base}" | cut -d " " -f 3-
+  fi
+  printf "\n"
+} >> "${CHANGELOG_FILE}"
+
 decomposer_run() {
   validate_inputs
+  decomposer_write_project_changelog
   decomposer_process_file "${CWD}/decomposer.json"
   decomposer_create_project_autoload "${CWD}/decomposer.json"
 

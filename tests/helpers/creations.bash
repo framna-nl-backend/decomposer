@@ -17,6 +17,9 @@ EOF"
 
     printf '}'
   } > "${TEST_WORKING_DIR}/decomposer.json"
+
+  git add "${TEST_WORKING_DIR}/decomposer.json"
+  git commit -a -m "Add decomposer.json"
 }
 
 create_repository() {

@@ -132,3 +132,62 @@ SUITE_NAME=$( test_suite_name )
 
   assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_deleted
 }
+
+@test "${SUITE_NAME}: project with new commits" {
+  create_decomposer_json alpha_psr4
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  git -C "${TARGET_DIR}/Alpha-1.0" checkout -b new_branch
+
+  # create new commit in repository
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+
+  # create a new commit in the working directory
+  git -C "${TEST_WORKING_DIR}" commit \
+    --allow-empty --message 'new feature'
+
+  run_decomposer install --changelog "${TEST_WORKING_DIR}/test.file"
+  [ "${status}" -eq 0 ]
+  git -C "${TEST_WORKING_DIR}" log --pretty="oneline" > /tmp/output.log
+  echo ${lines} >> /tmp/output.log
+
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_project_default
+}
+
+@test "${SUITE_NAME}: project with removed commits" {
+  create_decomposer_json alpha_psr4
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  git -C "${TARGET_DIR}/Alpha-1.0" checkout -b new_branch
+
+  # create new commit in repository
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+
+  # create a new commit in the working directory
+  git -C "${TEST_WORKING_DIR}" commit \
+    --allow-empty --message 'new feature'
+
+  # switch to a branch that doesn't have that commit
+  git -C "${TEST_WORKING_DIR}" checkout -b new_branch HEAD~
+
+  run_decomposer install --changelog "${TEST_WORKING_DIR}/test.file"
+  [ "${status}" -eq 0 ]
+  git -C "${TEST_WORKING_DIR}" log --pretty="oneline" > /tmp/output.log
+  echo ${lines} >> /tmp/output.log
+
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_project_deleted
+}
