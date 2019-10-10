@@ -362,19 +362,19 @@ decomposer_write_project_changelog() {
   name=$( git config --get remote.origin.url | rev | cut -d "/" -f 1 | rev | sed "s|.git||" )
   last=$( git reflog --pretty='%h' --since="5 minutes ago" --date=relative | head -n 1 )
 
-  if ! [ -z "${last}" ]; then
-    base=$(git show HEAD@{1} --pretty="%h" 2>/dev/null | head -n 1)
+  if [ -n "${last}" ]; then
+    base=$(git show 'HEAD@{1}' --pretty="%h" 2>/dev/null | head -n 1)
   else
     base=''
   fi
 
   printf "# %s:\n" "${name}"
   printf "## Added:\n"
-  if ! [ -z "${base}" ]; then
+  if [ -n "${base}" ]; then
     git cherry -v "${base}" HEAD | cut -d " " -f 3-
   fi
   printf "\n## Removed:\n"
-  if ! [ -z "${base}" ]; then
+  if [ -n "${base}" ]; then
     git cherry -v HEAD "${base}" | cut -d " " -f 3-
   fi
   printf "\n"
@@ -402,7 +402,7 @@ parse_arguments() {
     case "$1" in
       "-c" | "--changelog")
         GENERATE_CHANGELOG=1
-        if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
           case "$2" in
             /*) CHANGELOG_FILE="$2" ;;
             *) CHANGELOG_FILE="${CWD}/$2" ;;
@@ -415,7 +415,7 @@ parse_arguments() {
         ;;
       *)
         printf "Unknown option %s\n" "$1"
-        if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
           shift
         fi
         ;;
