@@ -382,7 +382,11 @@ decomposer_write_project_changelog() {
 
 decomposer_run() {
   validate_inputs
-  decomposer_write_project_changelog
+
+  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
+    decomposer_write_project_changelog
+  fi
+
   decomposer_process_file "${CWD}/decomposer.json"
   decomposer_create_project_autoload "${CWD}/decomposer.json"
 
