@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+CWD=$( pwd )
+
+# shellcheck source=/dev/null
+source "$( dirname "$0" )/../lib/general.sh"
+
+validate_arguments() {
+  if ! [ -f "${CWD}/decomposer.json" ]; then
+    exit_error 'No decomposer.json found.'
+  fi
+}
+
+process_file() {
+  local file="$1"
+
+  if ! [ "$( jq -r type "${file}" 2> /dev/null )" = 'object' ]; then
+    echo 'decomposer.json is not a valid JSON object'
+    return 1
+  fi
+
+  local libraries_names status_text object result=0
+
+  libraries_names=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
+
+  for name in ${libraries_names}; do
+    object=$( jq ".\"${name}\"" "${file}")
+
+    printf 'Validating %s...' "${name}"
+
+    if validate_library "${object}" status_text; then
+      printf 'OK\n'
+    else
+      printf 'FAIL (%s)\n' "${status_text}"
+      result=1
+    fi
+  done
+
+  return "${result}"
+}
+
+validate_library() {
+  local object="$1"
+  local status_text_variable="$2"
+
+  if ! [ "$( jq -r type <<< "${object}" )" = 'object' ]; then
+    printf -v "${status_text_variable}" 'not an object'
+    return 1
+  fi
+
+  if ! [ "$( jq -r '.url|type' <<< "${object}" )" = 'string' ]; then
+    printf -v "${status_text_variable}" 'invalid url'
+    return 1
+  fi
+
+  if ! [ "$( jq -r '.version|type' <<< "${object}" )" = 'string' ]; then
+    printf -v "${status_text_variable}" 'invalid version'
+    return 1
+  fi
+
+  if [ "$( jq 'has("revision")' <<< "${object}" )" = 'true' ] \
+    && ! [ "$( jq -r '.revision|type' <<< "${object}" )" = 'string' ]; then
+    printf -v "${status_text_variable}" 'invalid revision'
+    return 1
+  fi
+
+  if [ "$( jq 'has("target-dir")' <<< "${object}" )" = 'true' ] \
+    && ! [ "$( jq -r '."target-dir"|type' <<< "${object}" )" = 'string' ]; then
+    printf -v "${status_text_variable}" 'invalid target-dir'
+    return 1
+  fi
+
+  local has_psr0 has_psr4
+
+  has_psr0=$( jq 'has("psr0")' <<< "${object}" )
+  has_psr4=$( jq 'has("psr4")' <<< "${object}" )
+
+  if [ "${has_psr0}" = 'false' ] && [ "${has_psr4}" = 'false' ]; then
+    printf -v "${status_text_variable}" 'missing psr0 or psr4'
+    return 1
+  fi
+
+  if [ "${has_psr0}" = 'true' ] && [ "${has_psr4}" = 'true' ]; then
+    printf -v "${status_text_variable}" 'conflicting psr0 and psr4'
+    return 1
+  fi
+}
+
+validate_arguments
+
+process_file "${CWD}/decomposer.json"

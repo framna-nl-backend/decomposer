@@ -11,6 +11,7 @@ Commands:
   install    install all the libraries and generate an include file
              -c --changelog [FILE] generate a changelog from last installation
              --no-dev              meant for installation on production environment
+  validate   validate the decomposer.json file
   help       display this message
 EOF
 }

@@ -35,6 +35,10 @@ Decomposer currently supports these commands:
 
   > Display help
 
+  `decomposer validate`
+
+  > Validate the decomposer.json file
+
   `decomposer install`
 
   > Installs all the libraries listed in `decomposer.json` and generates the include file.
