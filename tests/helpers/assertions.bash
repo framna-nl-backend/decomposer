@@ -1,14 +1,11 @@
 md5checksum_decomposer_json() {
   local file="${TEST_WORKING_DIR}/decomposer.json"
 
-  case "$( uname )" in
-    'Linux')
-      md5sum "${file}" | cut -f1 -d' '
-      ;;
-    'Darwin')
-      md5 -q "${file}"
-      ;;
-  esac
+  if command -v 'md5sum' >/dev/null; then
+    md5sum "${file}" | cut -f1 -d' '
+  elif command -v 'md5' >/dev/null; then
+    md5 -q "${file}"
+  fi
 }
 
 assert_lib_installed() {

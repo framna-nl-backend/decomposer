@@ -19,6 +19,7 @@ Decomposer itself is just a bash script, but there's a few other tools it uses:
 * [jq](https://stedolan.github.io/jq/) - Needed for the parsing of the decomposer.json file
 * [autoload-psr](https://github.com/pprkut/autoload-psr) - Used for autoloading of PHP libraries
 * [git](https://git-scm.com/) - Only libraries from git repositories are supported
+* md5sum or md5 command
 
 Installation
 ===
