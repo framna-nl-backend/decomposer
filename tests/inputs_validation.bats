@@ -17,7 +17,7 @@ SUITE_NAME=$( test_suite_name )
 @test "${SUITE_NAME}: invalid command" {
   run_decomposer xxx
   [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: Invalid command" ]
+  [ "${lines[0]}" = "decomposer: Invalid command 'xxx'" ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
 

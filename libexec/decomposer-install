@@ -2,33 +2,63 @@
 
 CWD=$( pwd )
 TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
-SCRIPT_NAME=${0##*/}
+
 GENERATE_CHANGELOG=0
 CHANGELOG_FILE=${CWD}/decomposer.diffnotes.md
 INCLUDE_OUTDATED_CHECK=1
 
-usage() {
-  cat << EOF
-usage: ${SCRIPT_NAME} <command> [<options>]
+# shellcheck source=/dev/null
+source "$( dirname "$0" )/../lib/general.sh"
 
-Manage a PHP project libraries
-Rely on decomposer.json file in working directory
-
-Commands:
-  install    install all the libraries and generate an include file
-             -c --changelog [FILE] generate a changelog from last installation
-             --no-dev              meant for installation on production environment
-  help       display this message
-EOF
+parse_arguments() {
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      "-c" | "--changelog")
+        GENERATE_CHANGELOG=1
+        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+          case "$2" in
+            /*) CHANGELOG_FILE="$2" ;;
+            *) CHANGELOG_FILE="${CWD}/$2" ;;
+          esac
+          shift
+        fi
+        ;;
+      "--no-dev")
+        INCLUDE_OUTDATED_CHECK=0
+        ;;
+      *)
+        printf "Unknown option %s\n" "$1"
+        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+          shift
+        fi
+        ;;
+    esac
+    shift
+  done
 }
 
-error() {
-  [[ -z "$1" ]] || printf '%s: %s\n' "${SCRIPT_NAME}" "$1"
-  printf "Try '%s help' for more information.\\n" "${SCRIPT_NAME}"
-  exit 1
-} >&2
+validate_arguments() {
+  if ! [ -f "${CWD}/decomposer.json" ]; then
+    exit_error 'No decomposer.json found.'
+  fi
 
-decomposer_install_library() {
+  if ! [ -d "${TARGET_DIR}" ] || ! [ -w "${TARGET_DIR}" ]; then
+    exit_error "TARGET_DIR '${TARGET_DIR}' is not a writable directory."
+  fi
+
+  if ! [ "$( jq -r type "${CWD}/decomposer.json" 2> /dev/null )" = 'object' ]; then
+    exit_error 'decomposer.json is not a valid JSON object'
+  fi
+
+  # Clear changelog and test write
+  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
+    if ! printf '' 2> /dev/null > "${CHANGELOG_FILE}"; then
+      exit_error "Changelog file '${CHANGELOG_FILE}' is not writable."
+    fi
+  fi
+}
+
+install_library() {
   local name="$1"
   local object="$2"
   local status_text_variable="$3"
@@ -127,11 +157,11 @@ decomposer_install_library() {
   fi
 
   if [ "${GENERATE_CHANGELOG}" == 1 ]; then
-    decomposer_write_changelog
+    write_library_changelog
   fi
 }
 
-decomposer_write_changelog() {
+write_library_changelog() {
   local base
   base=$( git reflog | head -n 2 | tail -n 1 | cut -d " " -f 1 )
 
@@ -143,7 +173,31 @@ decomposer_write_changelog() {
   printf "\n"
 } >> "${CHANGELOG_FILE}"
 
-decomposer_create_library_autoload() {
+write_project_changelog() {
+  local base
+  local name
+  name=$( git config --get remote.origin.url | sed -e 's|.*/\(.*\)|\1|' -e 's|\.git$||' )
+  last=$( git reflog --pretty='%h' --since="5 minutes ago" --date=relative | head -n 1 )
+
+  if [ -n "${last}" ]; then
+    base=$(git show 'HEAD@{1}' --pretty="%h" 2>/dev/null | head -n 1)
+  else
+    base=''
+  fi
+
+  printf "# %s:\n" "${name}"
+  printf "## Added:\n"
+  if [ -n "${base}" ]; then
+    git cherry -v "${base}" HEAD | cut -d " " -f 3-
+  fi
+  printf "\n## Removed:\n"
+  if [ -n "${base}" ]; then
+    git cherry -v HEAD "${base}" | cut -d " " -f 3-
+  fi
+  printf "\n"
+} >> "${CHANGELOG_FILE}"
+
+create_library_autoload() {
   local name="$1"
   local object="$2"
 
@@ -202,7 +256,7 @@ EOF
   fi
 }
 
-decomposer_process_file() {
+process_file() {
   local file="$1"
 
   local libraries_names status_text object
@@ -214,12 +268,12 @@ decomposer_process_file() {
 
     printf 'Installing %s...' "${name}"
 
-    if ! decomposer_validate_library "${object}" status_text; then
+    if ! validate_library "${object}" status_text; then
       printf 'failed (invalid definition: %s)\n' "${status_text}"
       continue
     fi
 
-    decomposer_install_library "${name}" "${object}" status_text
+    install_library "${name}" "${object}" status_text
 
     case "$?" in
       0) printf 'done\n' ;;
@@ -227,11 +281,11 @@ decomposer_process_file() {
       2) printf 'skipped (%s)\n' "${status_text}" ;;
     esac
 
-    decomposer_create_library_autoload "${name}" "${object}"
+    create_library_autoload "${name}" "${object}"
   done
 }
 
-decomposer_validate_library() {
+validate_library() {
   local object="$1"
   local status_text_variable="$2"
   local conditions
@@ -303,7 +357,7 @@ md5checksum() {
   esac
 }
 
-decomposer_create_project_autoload() {
+create_project_autoload() {
   local file="$1"
 
   local libraries autoload md5 version
@@ -335,108 +389,16 @@ EOF
   printf '\n?>\n' >> "${autoload}"
 }
 
-validate_inputs() {
-  if ! [ -f "${CWD}/decomposer.json" ]; then
-    error 'No decomposer.json found.'
-  fi
-
-  if ! [ -d "${TARGET_DIR}" ] || ! [ -w "${TARGET_DIR}" ]; then
-    error "TARGET_DIR '${TARGET_DIR}' is not a writable directory."
-  fi
-
-  if ! [ "$( jq -r type "${CWD}/decomposer.json" 2> /dev/null )" = 'object' ]; then
-    error 'decomposer.json is not a valid JSON object'
-  fi
-
-  # Clear changelog and test write
-  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
-    if ! printf '' 2> /dev/null > "${CHANGELOG_FILE}"; then
-      error "Changelog file '${CHANGELOG_FILE}' is not writable."
-    fi
-  fi
-}
-
-decomposer_write_project_changelog() {
-  local base
-  local name
-  name=$( git config --get remote.origin.url | sed -e 's|.*/\(.*\)|\1|' -e 's|\.git$||' )
-  last=$( git reflog --pretty='%h' --since="5 minutes ago" --date=relative | head -n 1 )
-
-  if [ -n "${last}" ]; then
-    base=$(git show 'HEAD@{1}' --pretty="%h" 2>/dev/null | head -n 1)
-  else
-    base=''
-  fi
-
-  printf "# %s:\n" "${name}"
-  printf "## Added:\n"
-  if [ -n "${base}" ]; then
-    git cherry -v "${base}" HEAD | cut -d " " -f 3-
-  fi
-  printf "\n## Removed:\n"
-  if [ -n "${base}" ]; then
-    git cherry -v HEAD "${base}" | cut -d " " -f 3-
-  fi
-  printf "\n"
-} >> "${CHANGELOG_FILE}"
-
-decomposer_run() {
-  validate_inputs
-
-  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
-    decomposer_write_project_changelog
-  fi
-
-  decomposer_process_file "${CWD}/decomposer.json"
-  decomposer_create_project_autoload "${CWD}/decomposer.json"
-
-  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
-    printf "\nWrote changelog to %s\n" "${CHANGELOG_FILE}"
-  fi
-}
-
-parse_arguments() {
-  COMMAND=$1
-  shift
-  while [ "$#" -gt 0 ]; do
-    case "$1" in
-      "-c" | "--changelog")
-        GENERATE_CHANGELOG=1
-        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-          case "$2" in
-            /*) CHANGELOG_FILE="$2" ;;
-            *) CHANGELOG_FILE="${CWD}/$2" ;;
-          esac
-          shift
-        fi
-        ;;
-      "--no-dev")
-        INCLUDE_OUTDATED_CHECK=0
-        ;;
-      *)
-        printf "Unknown option %s\n" "$1"
-        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-          shift
-        fi
-        ;;
-    esac
-    shift
-  done
-
-  case "${COMMAND}" in
-    'install')
-      decomposer_run
-      ;;
-    'help')
-      usage
-      exit
-      ;;
-    '')
-      error 'Missing command'
-      ;;
-    *)
-      error 'Invalid command'
-  esac
-}
-
 parse_arguments "$@"
+validate_arguments
+
+if [ "${GENERATE_CHANGELOG}" == 1 ]; then
+  write_project_changelog
+fi
+
+process_file "${CWD}/decomposer.json"
+create_project_autoload "${CWD}/decomposer.json"
+
+if [ "${GENERATE_CHANGELOG}" == 1 ]; then
+  printf "\nWrote changelog to %s\n" "${CHANGELOG_FILE}"
+fi

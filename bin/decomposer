@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+usage() {
+  cat << EOF
+usage: decomposer <command> [<options>]
+
+Manage a PHP project libraries
+Rely on decomposer.json file in working directory
+
+Commands:
+  install    install all the libraries and generate an include file
+             -c --changelog [FILE] generate a changelog from last installation
+             --no-dev              meant for installation on production environment
+  help       display this message
+EOF
+}
+
+# shellcheck source=/dev/null
+source "$( dirname "$0" )/../lib/general.sh"
+
+if [ -z "$1" ]; then
+  exit_error 'Missing command'
+fi
+
+COMMAND="$1"
+shift
+
+if [ "${COMMAND}" = 'help' ]; then
+  usage
+  exit
+fi
+
+COMMAND_FILE="$( dirname "$0" )/../libexec/decomposer-${COMMAND}"
+
+if [ ! -f "${COMMAND_FILE}" ]; then
+  exit_error "Invalid command '${COMMAND}'"
+fi
+
+exec "${COMMAND_FILE}" "$@"

@@ -23,7 +23,7 @@ Decomposer itself is just a bash script, but there's a few other tools it uses:
 Installation
 ===
 
-Decomposer is a self-contained script. Just copy or link it into a directory in your PATH (e.g. /usr/local/bin)
+Clone the repository and add the `bin` directory to your PATH.
 
 Usage
 ===

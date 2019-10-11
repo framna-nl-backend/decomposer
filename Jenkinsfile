@@ -13,7 +13,7 @@ pipeline {
 
         stage('Code inspection'){
             steps {
-                sh "/bin/shellcheck --format=checkstyle --shell=bash decomposer > checkstyle.xml"
+                sh "/bin/shellcheck --format=checkstyle --shell=bash bin/decomposer lib/* libexec/* > checkstyle.xml"
             }
         }
     }
