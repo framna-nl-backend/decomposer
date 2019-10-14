@@ -3,8 +3,6 @@
 CWD=$( pwd )
 TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
 
-GENERATE_CHANGELOG=0
-CHANGELOG_FILE=${CWD}/decomposer.diffnotes.md
 INCLUDE_OUTDATED_CHECK=1
 
 # shellcheck source=/dev/null
@@ -13,16 +11,6 @@ source "$( dirname "$0" )/../lib/general.sh"
 parse_arguments() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
-      "-c" | "--changelog")
-        GENERATE_CHANGELOG=1
-        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
-          case "$2" in
-            /*) CHANGELOG_FILE="$2" ;;
-            *) CHANGELOG_FILE="${CWD}/$2" ;;
-          esac
-          shift
-        fi
-        ;;
       "--no-dev")
         INCLUDE_OUTDATED_CHECK=0
         ;;
@@ -44,13 +32,6 @@ validate_arguments() {
 
   if ! [ -d "${TARGET_DIR}" ] || ! [ -w "${TARGET_DIR}" ]; then
     exit_error "TARGET_DIR '${TARGET_DIR}' is not a writable directory."
-  fi
-
-  # Clear changelog and test write
-  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
-    if ! printf '' 2> /dev/null > "${CHANGELOG_FILE}"; then
-      exit_error "Changelog file '${CHANGELOG_FILE}' is not writable."
-    fi
   fi
 }
 
@@ -151,47 +132,7 @@ install_library() {
     printf -v "${status_text_variable}" 'resetting changes failed'
     return 1
   fi
-
-  if [ "${GENERATE_CHANGELOG}" == 1 ]; then
-    write_library_changelog
-  fi
 }
-
-write_library_changelog() {
-  local base
-  base=$( git reflog | head -n 2 | tail -n 1 | cut -d " " -f 1 )
-
-  printf "# %s:\n" "${name}"
-  printf "## Added:\n"
-  git cherry -v "${base}" HEAD | cut -d " " -f 3-
-  printf "\n## Removed:\n"
-  git cherry -v HEAD "${base}" | cut -d " " -f 3-
-  printf "\n"
-} >> "${CHANGELOG_FILE}"
-
-write_project_changelog() {
-  local base
-  local name
-  name=$( git config --get remote.origin.url | sed -e 's|.*/\(.*\)|\1|' -e 's|\.git$||' )
-  last=$( git reflog --pretty='%h' --since="5 minutes ago" --date=relative | head -n 1 )
-
-  if [ -n "${last}" ]; then
-    base=$(git show 'HEAD@{1}' --pretty="%h" 2>/dev/null | head -n 1)
-  else
-    base=''
-  fi
-
-  printf "# %s:\n" "${name}"
-  printf "## Added:\n"
-  if [ -n "${base}" ]; then
-    git cherry -v "${base}" HEAD | cut -d " " -f 3-
-  fi
-  printf "\n## Removed:\n"
-  if [ -n "${base}" ]; then
-    git cherry -v HEAD "${base}" | cut -d " " -f 3-
-  fi
-  printf "\n"
-} >> "${CHANGELOG_FILE}"
 
 create_library_autoload() {
   local name="$1"
@@ -321,13 +262,5 @@ EOF
 parse_arguments "$@"
 validate_arguments
 
-if [ "${GENERATE_CHANGELOG}" == 1 ]; then
-  write_project_changelog
-fi
-
 process_file "${CWD}/decomposer.json"
 create_project_autoload "${CWD}/decomposer.json"
-
-if [ "${GENERATE_CHANGELOG}" == 1 ]; then
-  printf "\nWrote changelog to %s\n" "${CHANGELOG_FILE}"
-fi

@@ -49,17 +49,25 @@ project's last pull of changes updated the `decomposer.json` file. It should not
 production environment. Not having it there is saving some unnecessary computing for every process.
 On such a production environment, the `--no-dev` should be then used.
 
-For the install command the `-c FILE / --changelog=FILE` option can be passed. This will create a file containing
-the changes in the dependencies and in the main project (since last installation) in markdown format.
-The optional FILE argument is used to specify the changelog file location. If no location is provided decomposer
-falls back to a `decomposer.diffnotes.md` file in the current working directory.
-
 Install location of libraries is controlled using the environment variable `TARGET_DIR`. By default this is
 `/var/www/libs`.
 
 As a precaution to not wreak havoc on your development setup, decomposer will not touch libraries in `TARGET_DIR`
 that are manually installed using symbolic links or git worktree checkouts. However, do note that in case it is
 a normal git clone, decomposer will reset the repo and throw away any local changes.
+
+  `decomposer generate-changelog`
+
+  > Generate a changelog of the main project and the dependencies
+
+It accepts the following options:
+- `-f --file FILE` to define the file to write the changelog to.
+  By default the changelog will be written in a `decomposer.diffnotes.md` file in the current working directory.
+- `-t --time TIME` to define the base in the history to generate the changes against.
+  So for example using `-t '1 hour ago'` would generate a file containing the changes from the version that
+  was installed locally 1 hour ago (see *gitrevisions*(1) for allowed TIME values).
+  The default is to generate a changelog against the version from "5 minutes ago". This means that if the command
+  is run just after an install command, it will report all the changes brought up by that last installation.
 
 decomposer.json
 ===

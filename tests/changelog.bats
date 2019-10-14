@@ -4,61 +4,32 @@ load helpers/main
 load helpers/creations
 load helpers/assertions
 
-# This suite tests the "install" command
+# This suite tests the "generate-changelog" command
 
 SUITE_NAME=$( test_suite_name )
 
-@test "${SUITE_NAME}: existing library fetches new commits without log as default" {
+@test "${SUITE_NAME}: changelog pointing to inaccessible location" {
   create_decomposer_json alpha_psr4
 
-  create_repository alpha-lib
+  run_decomposer generate-changelog --file '/root/changelog.fail'
+  [ "${status}" -eq 1 ]
+  [ "${lines[0]}" = "decomposer: Changelog file '/root/changelog.fail' is not writable." ]
 
-  # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
-
-  # create new commit in repository
-  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
-    --allow-empty --message 'extra commit'
-
-  local commit_alpha_lib_revision_hash=$(
-    git -C "${TEST_REPOS_DIR}/alpha-lib" \
-      rev-parse HEAD
-  )
-
-  run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ ! -a "${TEST_WORKING_DIR}/decomposer.diffnotes.md" ]
-  assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+  [[ ! -f "/root/changelog.fail" ]]
 }
 
-@test "${SUITE_NAME}: existing library fetches new commits and writes log" {
+@test "${SUITE_NAME}: changelog pointing to non writable file" {
   create_decomposer_json alpha_psr4
 
-  create_repository alpha-lib
+  touch "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
+  chmod -w "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
 
-  # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
-
-  # create new commit in repository
-  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
-    --allow-empty --message 'extra commit'
-
-  local commit_alpha_lib_revision_hash=$(
-    git -C "${TEST_REPOS_DIR}/alpha-lib" \
-      rev-parse HEAD
-  )
-
-  run_decomposer install --changelog
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-
-  assert_changelog_file "${TEST_WORKING_DIR}/decomposer.diffnotes.md" changelog_default
-
-  assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+  run_decomposer generate-changelog --file "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
+  [ "${status}" -eq 1 ]
+  [ "${lines[0]}" = "decomposer: Changelog file '${TEST_WORKING_DIR}/decomposer.diffnotes.md' is not writable." ]
 }
 
-@test "${SUITE_NAME}: existing library fetches new commits and writes custom log, absolute path" {
+@test "${SUITE_NAME}: writes lib log, default file" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -66,25 +37,20 @@ SUITE_NAME=$( test_suite_name )
   # create usual clone of library
   git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
 
-  # create new commit in repository
-  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+  sleep 1
+
+  # new commit in cloned library
+  git -C "${TARGET_DIR}/Alpha-1.0" commit \
     --allow-empty --message 'extra commit'
 
-  local commit_alpha_lib_revision_hash=$(
-    git -C "${TEST_REPOS_DIR}/alpha-lib" \
-      rev-parse HEAD
-  )
-
-  run_decomposer install --changelog "${TEST_WORKING_DIR}/test.file"
+  run_decomposer generate-changelog -t '2 seconds ago'
   [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_default
-
-  assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+  cat "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
+  assert_changelog_file "${TEST_WORKING_DIR}/decomposer.diffnotes.md" changelog_lib_add
 }
 
-@test "${SUITE_NAME}: existing library fetches new commits and writes custom log, relative path" {
+@test "${SUITE_NAME}: writes lib custom log, absolute path" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -92,27 +58,41 @@ SUITE_NAME=$( test_suite_name )
   # create usual clone of library
   git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
 
-  # create new commit in repository
-  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+  sleep 1
+
+  # new commit in cloned library
+  git -C "${TARGET_DIR}/Alpha-1.0" commit \
     --allow-empty --message 'extra commit'
 
-  local commit_alpha_lib_revision_hash=$(
-    git -C "${TEST_REPOS_DIR}/alpha-lib" \
-      rev-parse HEAD
-  )
+  run_decomposer generate-changelog  -f "${TEST_WORKING_DIR}/test.file" -t '2 seconds ago'
+  [ "${status}" -eq 0 ]
+
+  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_lib_add
+}
+
+@test "${SUITE_NAME}: writes lib custom log, relative path" {
+  create_decomposer_json alpha_psr4
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+
+  sleep 1
+
+  # new commit in cloned library
+  git -C "${TARGET_DIR}/Alpha-1.0" commit \
+    --allow-empty --message 'extra commit'
 
   mkdir "${TEST_WORKING_DIR}/changelogs"
 
-  run_decomposer install --changelog changelogs/test.file
+  run_decomposer generate-changelog --file changelogs/test.file -t '2 seconds ago'
   [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_changelog_file "${TEST_WORKING_DIR}/changelogs/test.file" changelog_default
-
-  assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+  assert_changelog_file "${TEST_WORKING_DIR}/changelogs/test.file" changelog_lib_add
 }
 
-@test "${SUITE_NAME}: existing library fetches new commits and writes deleted log" {
+@test "${SUITE_NAME}: writes lib log, add and remove" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -120,20 +100,20 @@ SUITE_NAME=$( test_suite_name )
   # create usual clone of library
   git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
 
-  git -C "${TARGET_DIR}/Alpha-1.0" checkout -b new_branch
+  sleep 1
 
-  # create new commit in repository
+  # create new orphan commit in cloned library
+  git -C "${TARGET_DIR}/Alpha-1.0" checkout --orphan new_branch
   git -C "${TARGET_DIR}/Alpha-1.0" commit \
-    --allow-empty --message 'branched commit'
+    --allow-empty --message 'new commit'
 
-  run_decomposer install --changelog "${TEST_WORKING_DIR}/test.file"
+  run_decomposer generate-changelog -t '2 seconds ago'
   [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
 
-  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_deleted
+  assert_changelog_file "${TEST_WORKING_DIR}/decomposer.diffnotes.md" changelog_lib_both
 }
 
-@test "${SUITE_NAME}: project with new commits" {
+@test "${SUITE_NAME}: writes project log, add and remove" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -141,53 +121,15 @@ SUITE_NAME=$( test_suite_name )
   # create usual clone of library
   git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
 
-  git -C "${TARGET_DIR}/Alpha-1.0" checkout -b new_branch
+  sleep 1
 
-  # create new commit in repository
-  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
-    --allow-empty --message 'extra commit'
-
-  # create a new commit in the working directory
+  # create new orphan commit in the working directory
+  git -C "${TEST_WORKING_DIR}" checkout --orphan new_branch
   git -C "${TEST_WORKING_DIR}" commit \
-    --allow-empty --message 'new feature'
+        --allow-empty --message 'new commit'
 
-  run_decomposer install --changelog "${TEST_WORKING_DIR}/test.file"
+  run_decomposer generate-changelog -t '2 seconds ago'
   [ "${status}" -eq 0 ]
-  git -C "${TEST_WORKING_DIR}" log --pretty="oneline" > /tmp/output.log
-  echo ${lines} >> /tmp/output.log
 
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-
-  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_project_default
-}
-
-@test "${SUITE_NAME}: project with removed commits" {
-  create_decomposer_json alpha_psr4
-
-  create_repository alpha-lib
-
-  # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
-
-  git -C "${TARGET_DIR}/Alpha-1.0" checkout -b new_branch
-
-  # create new commit in repository
-  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
-    --allow-empty --message 'extra commit'
-
-  # create a new commit in the working directory
-  git -C "${TEST_WORKING_DIR}" commit \
-    --allow-empty --message 'new feature'
-
-  # switch to a branch that doesn't have that commit
-  git -C "${TEST_WORKING_DIR}" checkout -b new_branch HEAD~
-
-  run_decomposer install --changelog "${TEST_WORKING_DIR}/test.file"
-  [ "${status}" -eq 0 ]
-  git -C "${TEST_WORKING_DIR}" log --pretty="oneline" > /tmp/output.log
-  echo ${lines} >> /tmp/output.log
-
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-
-  assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_project_deleted
+  assert_changelog_file "${TEST_WORKING_DIR}/decomposer.diffnotes.md" changelog_project_both
 }
