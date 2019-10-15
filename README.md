@@ -24,7 +24,11 @@ Decomposer itself is just a bash script, but there's a few other tools it uses:
 Installation
 ===
 
-Clone the repository and add the `bin` directory to your PATH.
+## Local installation
+add the `bin` directory to your PATH.
+
+## System wide installation
+run `make install`
 
 Usage
 ===
@@ -128,8 +132,9 @@ To run the tests, you also need to have:
 
 * [bats-core](https://github.com/bats-core/bats-core) - Testing framework for Bash
 
-Then you can run all the tests with the following command:
+Then you can run all the tests with any of the following commands:
 
   `bats tests`
+  `make test`
 
 Test files must be located one level below the `tests` folder with a `.bats` extension.

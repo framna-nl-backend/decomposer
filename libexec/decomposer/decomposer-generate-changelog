@@ -7,7 +7,7 @@ CHANGELOG_FILE=${CWD}/decomposer.diffnotes.md
 CHANGELOG_TIME="5 minutes ago"
 
 # shellcheck source=/dev/null
-source "$( dirname "$0" )/../lib/general.sh"
+source "$( dirname "$0" )/../../lib/decomposer/general.sh"
 
 parse_arguments() {
   while [ "$#" -gt 0 ]; do

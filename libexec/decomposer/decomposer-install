@@ -6,7 +6,7 @@ TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
 INCLUDE_OUTDATED_CHECK=1
 
 # shellcheck source=/dev/null
-source "$( dirname "$0" )/../lib/general.sh"
+source "$( dirname "$0" )/../../lib/decomposer/general.sh"
 
 parse_arguments() {
   while [ "$#" -gt 0 ]; do

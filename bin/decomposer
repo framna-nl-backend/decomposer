@@ -19,7 +19,7 @@ EOF
 }
 
 # shellcheck source=/dev/null
-source "$( dirname "$0" )/../lib/general.sh"
+source "$( dirname "$0" )/../lib/decomposer/general.sh"
 
 if [ -z "$1" ]; then
   exit_error 'Missing command'
@@ -33,7 +33,7 @@ if [ "${COMMAND}" = 'help' ]; then
   exit
 fi
 
-COMMAND_FILE="$( dirname "$0" )/../libexec/decomposer-${COMMAND}"
+COMMAND_FILE="$( dirname "$0" )/../libexec/decomposer/decomposer-${COMMAND}"
 
 if [ ! -f "${COMMAND_FILE}" ]; then
   exit_error "Invalid command '${COMMAND}'"

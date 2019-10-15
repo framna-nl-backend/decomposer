@@ -3,7 +3,7 @@
 CWD=$( pwd )
 
 # shellcheck source=/dev/null
-source "$( dirname "$0" )/../lib/general.sh"
+source "$( dirname "$0" )/../../lib/decomposer/general.sh"
 
 validate_arguments() {
   if ! [ -f "${CWD}/decomposer.json" ]; then
