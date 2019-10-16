@@ -1,23 +1,5 @@
 #!/usr/bin/env bash
 
-usage() {
-  cat << EOF
-usage: decomposer <command> [<options>]
-
-Manage a PHP project libraries
-Rely on decomposer.json file in working directory
-
-Commands:
-  generate-changelog  generate a changelog for the project and libraries
-             -f --file FILE   file to write the changelog to (default: decomposer.diffnotes.md)
-             -t --time TIME   includes local changes since TIME (default: "5 minutes ago")
-  install    install all the libraries and generate an include file
-             --no-dev         meant for installation on production environment
-  validate   performs some validations on the decomposer.json file
-  help       display this message
-EOF
-}
-
 # shellcheck source=/dev/null
 source "$( dirname "$0" )/../lib/decomposer/general.sh"
 
@@ -29,7 +11,11 @@ COMMAND="$1"
 shift
 
 if [ "${COMMAND}" = 'help' ]; then
-  usage
+  if [ -z "$1" ]; then
+    man decomposer
+  else
+    man "decomposer-$1"
+  fi
   exit
 fi
 

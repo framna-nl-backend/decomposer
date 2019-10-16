@@ -14,7 +14,7 @@ directly. This way you are always in full control of your software stack.
 Requirements
 ===
 
-Decomposer itself is just a bash script, but there's a few other tools it uses:
+Decomposer itself is written in bash, but there's a few other tools it uses:
 
 * [jq](https://stedolan.github.io/jq/) - Needed for the parsing of the decomposer.json file
 * [autoload-psr](https://github.com/pprkut/autoload-psr) - Used for autoloading of PHP libraries
@@ -35,43 +35,20 @@ Usage
 
 Decomposer currently supports these commands:
 
-  `decomposer help`
-
-  > Display help
-
   `decomposer validate`
 
   > Validate the decomposer.json file
 
   `decomposer install`
 
-  > Installs all the libraries listed in `decomposer.json` and generates the include file.
-
-The include file contains a check that returns an error in case it is outdated.
-This extra check is mainly useful on a development environment to get warned to rerun `decomposer` after the
-project's last pull of changes updated the `decomposer.json` file. It should not be necessary on a controlled
-production environment. Not having it there is saving some unnecessary computing for every process.
-On such a production environment, the `--no-dev` should be then used.
-
-Install location of libraries is controlled using the environment variable `TARGET_DIR`. By default this is
-`/var/www/libs`.
-
-As a precaution to not wreak havoc on your development setup, decomposer will not touch libraries in `TARGET_DIR`
-that are manually installed using symbolic links or git worktree checkouts. However, do note that in case it is
-a normal git clone, decomposer will reset the repo and throw away any local changes.
+  > Install all the libraries
 
   `decomposer generate-changelog`
 
-  > Generate a changelog of the main project and the dependencies
+  > Generate a changelog of the main project and its libraries
 
-It accepts the following options:
-- `-f --file FILE` to define the file to write the changelog to.
-  By default the changelog will be written in a `decomposer.diffnotes.md` file in the current working directory.
-- `-t --time TIME` to define the base in the history to generate the changes against.
-  So for example using `-t '1 hour ago'` would generate a file containing the changes from the version that
-  was installed locally 1 hour ago (see *gitrevisions*(1) for allowed TIME values).
-  The default is to generate a changelog against the version from "5 minutes ago". This means that if the command
-  is run just after an install command, it will report all the changes brought up by that last installation.
+You can get a more detailed description about them in the `doc` folder.
+Or you can also run `decomposer help {command}` to display the manual of that command.
 
 decomposer.json
 ===
@@ -138,3 +115,14 @@ Then you can run all the tests with any of the following commands:
   `make test`
 
 Test files must be located one level below the `tests` folder with a `.bats` extension.
+
+Docs
+===
+
+To generate the man pages from the doc, you also need to have:
+
+* [scdoc](https://git.sr.ht/~sircmpwn/scdoc) - Man page generator
+
+Then you can generate the man pages with the following command:
+
+  `make doc`
