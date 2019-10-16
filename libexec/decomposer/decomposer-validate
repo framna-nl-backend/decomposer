@@ -4,6 +4,8 @@ CWD=$( pwd )
 
 # shellcheck source=/dev/null
 source "$( dirname "$0" )/../../lib/decomposer/general.sh"
+# shellcheck source=/dev/null
+source "$( dirname "$0" )/../../lib/decomposer/helpers.sh"
 
 validate_arguments() {
   if ! [ -f "${CWD}/decomposer.json" ]; then
@@ -19,24 +21,23 @@ process_file() {
     return 1
   fi
 
-  local libraries_names status_text object result=0
+  map_libraries_object "${file}" process_library
+}
 
-  libraries_names=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
+process_library() {
+  local name="$1"
+  local object="$2"
 
-  for name in ${libraries_names}; do
-    object=$( jq ".\"${name}\"" "${file}")
+  local status_text
 
-    printf 'Validating %s...' "${name}"
+  printf 'Validating %s...' "${name}"
 
-    if validate_library "${object}" status_text; then
-      printf 'OK\n'
-    else
-      printf 'FAIL (%s)\n' "${status_text}"
-      result=1
-    fi
-  done
+  if ! validate_library "${object}" status_text; then
+    printf 'FAIL (%s)\n' "${status_text}"
+    return 1
+  fi
 
-  return "${result}"
+  printf 'OK\n'
 }
 
 validate_library() {

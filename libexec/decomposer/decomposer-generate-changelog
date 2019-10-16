@@ -8,6 +8,8 @@ CHANGELOG_TIME="5 minutes ago"
 
 # shellcheck source=/dev/null
 source "$( dirname "$0" )/../../lib/decomposer/general.sh"
+# shellcheck source=/dev/null
+source "$( dirname "$0" )/../../lib/decomposer/helpers.sh"
 
 parse_arguments() {
   while [ "$#" -gt 0 ]; do
@@ -49,17 +51,28 @@ validate_arguments() {
   fi
 }
 
-write_repo_changelog() (
-  local repo_path="$1"
+process_file() {
+  local file="$1"
 
-  local name base_ref added removed
+  local project_name
 
-  cd "${repo_path}" || return 1
-
-  name=$(
+  project_name=$(
     git config --get remote.origin.url \
       | sed -e 's|.*/\(.*\)|\1|' -e 's|\.git$||'
   )
+
+  write_repo_changelog "${project_name}" "${CWD}"
+
+  map_libraries_repo "${file}" write_repo_changelog
+}
+
+write_repo_changelog() (
+  local name="$1"
+  local repo="$2"
+
+  local base_ref added removed
+
+  cd "${repo}" || return 1
 
   base_ref=$(
     git rev-parse "HEAD@{${CHANGELOG_TIME}}" 2> /dev/null
@@ -73,7 +86,6 @@ write_repo_changelog() (
     git cherry -v HEAD "${base_ref}" \
       | cut -d " " -f 3-
   )
-
 
   if [ -z "${added}" ] && [ -z "${removed}" ]; then
     return
@@ -91,30 +103,6 @@ write_repo_changelog() (
     fi
   } >> "${CHANGELOG_FILE}"
 )
-
-process_file() {
-  local file="$1"
-
-  local libraries
-
-  write_repo_changelog "${CWD}"
-
-  libraries=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
-  for name in ${libraries}; do
-    object=$( jq ".\"${name}\"" "${file}")
-
-    library_target_dir=$( jq -r '."target-dir"' <<< "${object}" )
-    version=$( jq -r '.version' <<< "${object}" )
-
-    if [ "${library_target_dir}" = "null" ]; then
-      library_target_dir="${name}-${version}"
-    else
-      library_target_dir="${name}-${version}${library_target_dir}"
-    fi
-
-    write_repo_changelog "${TARGET_DIR}/${library_target_dir}"
-  done
-}
 
 parse_arguments "$@"
 validate_arguments

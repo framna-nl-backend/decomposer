@@ -7,6 +7,8 @@ INCLUDE_OUTDATED_CHECK=1
 
 # shellcheck source=/dev/null
 source "$( dirname "$0" )/../../lib/decomposer/general.sh"
+# shellcheck source=/dev/null
+source "$( dirname "$0" )/../../lib/decomposer/helpers.sh"
 
 parse_arguments() {
   while [ "$#" -gt 0 ]; do
@@ -196,25 +198,26 @@ EOF
 process_file() {
   local file="$1"
 
-  local libraries_names status_text object
+  map_libraries_object "${file}" process_library
+}
 
-  libraries_names=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
+process_library() {
+  local name="$1"
+  local object="$2"
 
-  for name in ${libraries_names}; do
-    object=$( jq ".\"${name}\"" "${file}")
+  local status_text
 
-    printf 'Installing %s...' "${name}"
+  printf 'Installing %s...' "${name}"
 
-    install_library "${name}" "${object}" status_text
+  install_library "${name}" "${object}" status_text
 
-    case "$?" in
-      0) printf 'done\n' ;;
-      1) printf 'failed (%s)\n' "${status_text}" ;;
-      2) printf 'skipped (%s)\n' "${status_text}" ;;
-    esac
+  case "$?" in
+    0) printf 'done\n' ;;
+    1) printf 'failed (%s)\n' "${status_text}" ;;
+    2) printf 'skipped (%s)\n' "${status_text}" ;;
+  esac
 
-    create_library_autoload "${name}" "${object}"
-  done
+  create_library_autoload "${name}" "${object}"
 }
 
 md5checksum() {
@@ -230,33 +233,35 @@ md5checksum() {
 create_project_autoload() {
   local file="$1"
 
-  local libraries autoload md5 version
+  local md5
 
-  libraries=$( jq -r ".|to_entries|map(.key|tostring)|.[]" "${file}" )
-  autoload="${CWD}/decomposer.autoload.inc.php"
+  {
+    printf '<?php\n\n'
 
-  printf '<?php\n\n' > "${autoload}"
+    if [ "${INCLUDE_OUTDATED_CHECK}" == 1 ]; then
+      md5=$( md5checksum "${CWD}/decomposer.json" )
 
-  if [ "${INCLUDE_OUTDATED_CHECK}" == 1 ]; then
-    md5=$( md5checksum "${CWD}/decomposer.json" )
-
-    cat << EOF >> "${autoload}"
+      cat << EOF
 if (md5_file(__DIR__ . '/decomposer.json') != '${md5}')
 {
     die("Decomposer autoload file is outdated. Please re-run 'decomposer install'");
 }
 
 EOF
-  fi
+     fi
 
-  for library in ${libraries}; do
-    if [ "$( jq -r ".\"${library}\".\"version\"|type" "${file}" )" = 'string' ]; then
-      version=$( jq -r ".\"${library}\".version" "${file}" 2> /dev/null )
-      printf "require_once '%s-%s.php';\\n" "${library}" "${version}" >> "${autoload}"
-    fi
-  done
+    map_libraries_object "${file}" print_library_require
 
-  printf '\n?>\n' >> "${autoload}"
+    printf '\n?>\n'
+  } > "${CWD}/decomposer.autoload.inc.php"
+}
+
+print_library_require() {
+  local name="$1"
+  local object="$2"
+
+  version=$( jq -r '.version' <<< "${object}" )
+  printf "require_once '%s-%s.php';\\n" "${name}" "${version}"
 }
 
 parse_arguments "$@"
