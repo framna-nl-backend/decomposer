@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+
+CWD=$( pwd )
+TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
+
+TMP_FILE=$( mktemp )
+trap 'rm "${TMP_FILE}"' EXIT
+
+NEW_DECOMPOSER_FILE=${CWD}/decomposer_new.json
+
+# shellcheck source=/dev/null
+source "$( dirname "$0" )/../../lib/decomposer/general.sh"
+# shellcheck source=/dev/null
+source "$( dirname "$0" )/../../lib/decomposer/helpers.sh"
+
+parse_arguments() {
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      "-f" | "--file")
+        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+          case "$2" in
+            /*) NEW_DECOMPOSER_FILE="$2" ;;
+            *) NEW_DECOMPOSER_FILE="${CWD}/$2" ;;
+          esac
+          shift
+        fi
+        ;;
+      *)
+        printf "Unknown option %s\n" "$1"
+        if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+          shift
+        fi
+        ;;
+    esac
+    shift
+  done
+}
+
+validate_arguments() {
+  if ! [ -f "${CWD}/decomposer.json" ]; then
+    exit_error 'No decomposer.json found.'
+  fi
+
+  # Clear new decomposer and test write
+  if ! printf '' 2> /dev/null > "${NEW_DECOMPOSER_FILE}"; then
+    exit_error "File '${NEW_DECOMPOSER_FILE}' is not writable."
+  fi
+}
+
+process_file() {
+  local file="$1"
+
+  printf '{' > "${TMP_FILE}"
+  map_libraries_object "${file}" process_library
+  printf '}' >> "${TMP_FILE}"
+
+  sed 's/,}$/}/' "${TMP_FILE}" \
+    | jq --indent 4 \
+    > "${NEW_DECOMPOSER_FILE}"
+}
+
+process_library() {
+  local name="$1"
+  local object="$2"
+
+  local status_text
+
+  printf 'Locking %s...' "${name}"
+
+  write_locked_library "${name}" "${object}" status_text
+
+  case "$?" in
+    0) printf 'done\n' ;;
+    1) printf 'failed (%s)\n' "${status_text}" ;;
+    2) printf 'skipped (%s)\n' "${status_text}" ;;
+  esac
+}
+
+write_locked_library() {
+  local name="$1"
+  local object="$2"
+  local status_text_variable="$3"
+
+  local revision
+
+  revision=$( jq -r '.revision' <<< "${object}" )
+
+  # no change if the library uses a tag
+  if [ "${revision}" = "null" ]; then
+    printf '"%s":%s,' "${name}" "${object}" >> "${TMP_FILE}"
+    printf -v "${status_text_variable}" 'already locked'
+    return 2
+  fi
+
+  local version library_target_dir
+
+  version=$( jq -r '.version' <<< "${object}" )
+
+  library_target_dir=$( jq -r '."target-dir"' <<< "${object}" )
+  if [ "${library_target_dir}" = "null" ]; then
+    library_target_dir="${name}-${version}"
+  else
+    library_target_dir="${name}-${version}${library_target_dir}"
+  fi
+
+  cd "${TARGET_DIR}/${library_target_dir}" || return 1
+
+  if ! git fetch origin &> /dev/null; then
+    printf -v "${status_text_variable}" 'fetching changes failed'
+    return 1
+  fi
+
+  # no change if the library doesn't use a branch
+  if ! git branch -a | grep -q "/origin/${revision}"; then
+    printf '"%s":%s,' "${name}" "${object}" >> "${TMP_FILE}"
+    printf -v "${status_text_variable}" 'already locked'
+    return 2
+  fi
+
+  local locked_revision locked_object
+
+  locked_revision=$( git rev-parse "origin/${revision}^{commit}" )
+  locked_object=$( echo "${object}" | jq ".revision = \"${locked_revision}\"" )
+
+  printf '"%s":%s,' "${name}" "${locked_object}" >> "${TMP_FILE}"
+}
+
+parse_arguments "$@"
+validate_arguments
+
+process_file "${CWD}/decomposer.json"

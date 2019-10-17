@@ -125,3 +125,47 @@ EOF
 
   [ "${expected_content}" == "${result_content}" ]
 }
+
+assert_decomposer_file() {
+  local decomposer_file="$1"
+  shift
+  local fixture_names="$@"
+
+  [ -f "${decomposer_file}" ]
+
+  local new_decomposer_file=$( mktemp )
+
+  {
+    printf '{'
+
+    local lib_jsons=
+    for fixture_name in ${fixture_names}; do
+      lib_jsons+=",$(eval "cat << EOF
+$(< "${TEST_FIXTURES_DIR}/decomposer_json/${fixture_name}.json" )
+EOF"
+)"
+    done
+
+    # ignore first comma
+    printf '%s' "${lib_jsons:1}"
+
+    printf '}'
+  } > "${new_decomposer_file}"
+
+  local expected_content=$(
+    jq -c '' "${new_decomposer_file}"
+  )
+
+  local result_content=$(
+    jq -c '' "${decomposer_file}"
+  )
+
+  if [ "${expected_content}" != "${result_content}" ]; then
+    diff -u \
+      <( jq '' "${new_decomposer_file}" ) \
+      <( jq '' "${decomposer_file}" )
+    return 1
+  fi
+
+  return 0
+}

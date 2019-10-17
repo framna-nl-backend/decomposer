@@ -6,7 +6,8 @@ LIBS = \
 COMMANDS = \
 	install\
 	validate\
-	generate-changelog
+	generate-changelog \
+	lock
 
 all:
 
