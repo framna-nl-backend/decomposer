@@ -46,3 +46,6 @@ map_libraries_repo() {
 
   return "${result}"
 }
+
+export -f map_libraries_object
+export -f map_libraries_repo

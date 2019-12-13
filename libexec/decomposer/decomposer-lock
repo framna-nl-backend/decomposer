@@ -1,17 +1,11 @@
 #!/usr/bin/env bash
 
-CWD=$( pwd )
 TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
 
 TMP_FILE=$( mktemp )
 trap 'rm "${TMP_FILE}"' EXIT
 
 NEW_DECOMPOSER_FILE=${CWD}/decomposer_new.json
-
-# shellcheck source=/dev/null
-source "$( dirname "$0" )/../../lib/decomposer/general.sh"
-# shellcheck source=/dev/null
-source "$( dirname "$0" )/../../lib/decomposer/helpers.sh"
 
 parse_arguments() {
   while [ "$#" -gt 0 ]; do

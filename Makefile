@@ -1,9 +1,17 @@
-PREFIX = /usr
+DESTDIR ?= /
+PREFIX ?= /usr
 
-LIBS = \
-	general.sh
+bindir := $(PREFIX)/bin
+datadir := $(PREFIX)/share
+libexecdir := $(PREFIX)/libexec
 
-COMMANDS = \
+MANDIR ?= $(datadir)/man
+man1dir := $(MANDIR)/man1
+
+LIBS := \
+	helpers.sh
+
+COMMANDS := \
 	install\
 	validate\
 	generate-changelog \
@@ -21,35 +29,41 @@ doc:
 	done
 
 install:
-	install -D bin/decomposer "${DESTDIR}${PREFIX}/bin/decomposer"
+	install -d "${DESTDIR}$(bindir)"
+	install "bin/decomposer" "${DESTDIR}$(bindir)"
 
+	install -d "${DESTDIR}$(datadir)/decomposer";
 	for l in ${LIBS}; do \
-		install -Dm644 "lib/decomposer/$$l" "${DESTDIR}${PREFIX}/lib/decomposer/$$l"; \
+		install -m644 "share/decomposer/$$l" "${DESTDIR}$(datadir)/decomposer/$$l"; \
 	done
 
+	install -d "${DESTDIR}$(libexecdir)/decomposer/";
 	for c in ${COMMANDS}; do \
-		install -D "libexec/decomposer/decomposer-$$c" "${DESTDIR}${PREFIX}/libexec/decomposer/decomposer-$$c"; \
+		install "libexec/decomposer/decomposer-$$c" "${DESTDIR}$(libexecdir)/decomposer/decomposer-$$c"; \
 	done
 
-	install -Dm644 man/decomposer.1 "${DESTDIR}${PREFIX}/share/man/man1/decomposer.1"
+	install -d "${DESTDIR}$(mand1dir)"
+	install -m644 "man/decomposer.1" "${DESTDIR}$(man1dir)/decomposer.1"
 	for c in ${COMMANDS}; do \
-		install -Dm644 "man/decomposer-$$c.1" "${DESTDIR}${PREFIX}/share/man/man1/decomposer-$$c.1"; \
+		install -m644 "man/decomposer-$$c.1" "${DESTDIR}$(man1dir)/decomposer-$$c.1"; \
 	done
 
 uninstall:
-	rm -f "${DESTDIR}${PREFIX}/bin/decomposer"
+	rm -f "${DESTDIR}$(bindir)/decomposer"
 
 	for l in ${LIBS}; do \
-		rm -f "${DESTDIR}${PREFIX}/lib/decomposer/$$l"; \
+		rm -f "${DESTDIR}$(datadir)/decomposer/$$l"; \
 	done
+	rm -rf "${DESTDIR}$(datadir)/decomposer"
 
 	for c in ${COMMANDS}; do \
-		rm -f "${DESTDIR}${PREFIX}/libexec/decomposer/decomposer-$$c"; \
+		rm -f "${DESTDIR}$(libexecdir)/decomposer/decomposer-$$c"; \
 	done
+	rm -rf "${DESTDIR}$(libexecdir)/decomposer"
 
-	rm -f "${DESTDIR}${PREFIX}/share/man/man1/decomposer.1"
+	rm -f "${DESTDIR}$(man1dir)/decomposer.1"
 	for c in ${COMMANDS}; do \
-		rm -f "${DESTDIR}${PREFIX}/share/man/man1/decomposer-$$c.1"; \
+		rm -f "${DESTDIR}$(man1dir)/decomposer-$$c.1"; \
 	done
 
 .PHONY: all test doc install uninstall

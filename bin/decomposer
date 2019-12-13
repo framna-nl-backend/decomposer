@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-# shellcheck source=/dev/null
-source "$( dirname "$0" )/../lib/decomposer/general.sh"
+exit_error() {
+  [[ -z "$1" ]] || printf '%s: %s\n' decomposer "$1"
+  printf "Try '%s help' for more information.\\n" decomposer
+  exit 1
+} >&2
 
 if [ -z "$1" ]; then
   exit_error 'Missing command'
@@ -19,10 +22,19 @@ if [ "${COMMAND}" = 'help' ]; then
   exit
 fi
 
-COMMAND_FILE="$( dirname "$0" )/../libexec/decomposer/decomposer-${COMMAND}"
+CWD=$( pwd )
+DECOMPOSER_ROOT="$( dirname "$0" )/.."
+COMMAND_FILE="${DECOMPOSER_ROOT}/libexec/decomposer/decomposer-${COMMAND}"
 
 if [ ! -f "${COMMAND_FILE}" ]; then
   exit_error "Invalid command '${COMMAND}'"
 fi
+
+# shellcheck source=/dev/null
+source "${DECOMPOSER_ROOT}/share/decomposer/helpers.sh"
+
+export CWD
+export DECOMPOSER_ROOT
+export -f exit_error
 
 exec "${COMMAND_FILE}" "$@"
