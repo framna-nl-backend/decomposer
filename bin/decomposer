@@ -23,7 +23,7 @@ if [ "${COMMAND}" = 'help' ]; then
 fi
 
 CWD=$( pwd )
-DECOMPOSER_ROOT="$( dirname "$0" )/.."
+DECOMPOSER_ROOT="$( dirname "$(realpath $0)" )/.."
 COMMAND_FILE="${DECOMPOSER_ROOT}/libexec/decomposer/decomposer-${COMMAND}"
 
 if [ ! -f "${COMMAND_FILE}" ]; then
