@@ -42,7 +42,7 @@ install:
 		install "libexec/decomposer/decomposer-$$c" "${DESTDIR}$(libexecdir)/decomposer/decomposer-$$c"; \
 	done
 
-	install -d "${DESTDIR}$(mand1dir)"
+	install -d "${DESTDIR}$(man1dir)"
 	install -m644 "man/decomposer.1" "${DESTDIR}$(man1dir)/decomposer.1"
 	for c in ${COMMANDS}; do \
 		install -m644 "man/decomposer-$$c.1" "${DESTDIR}$(man1dir)/decomposer-$$c.1"; \
