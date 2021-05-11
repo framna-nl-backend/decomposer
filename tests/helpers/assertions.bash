@@ -12,10 +12,10 @@ assert_lib_installed() {
   local lib_name_version="$1"
   local expected_head_hash="$2"
 
-  [ -d "${TARGET_DIR}/${lib_name_version}" ]
+  [ -d "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" ]
 
   local result_head_hash=$(
-    git -C "${TARGET_DIR}/${lib_name_version}" \
+    git -C "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" \
       rev-parse --verify HEAD
   )
 
@@ -26,10 +26,10 @@ assert_lib_contains() {
   local lib_name_version="$1"
   local revision="$2"
 
-  [ -d "${TARGET_DIR}/${lib_name_version}" ]
+  [ -d "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" ]
 
   local object_type=$(
-    git -C "${TARGET_DIR}/${lib_name_version}" \
+    git -C "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" \
       cat-file -t "${revision}" 2> /dev/null
   )
 
@@ -40,14 +40,14 @@ assert_lib_autoload_file() {
   local lib_name_version="$1"
   local fixture_name="$2"
 
-  [ -f "${TARGET_DIR}/${lib_name_version}.php" ]
+  [ -f "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php" ]
 
   local expected_content=$(
     cat "${TEST_FIXTURES_DIR}/autoload_lib/${fixture_name}.php"
   )
 
   local result_content=$(
-    cat "${TARGET_DIR}/${lib_name_version}.php"
+    cat "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php"
   )
 
   [ "${expected_content}" == "${result_content}" ]

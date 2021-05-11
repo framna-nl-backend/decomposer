@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
+DECOMPOSER_TARGET_DIR=${DECOMPOSER_TARGET_DIR:-/var/www/libs/}
 
 CHANGELOG_FILE=${CWD}/decomposer.diffnotes.md
 CHANGELOG_TIME="5 minutes ago"

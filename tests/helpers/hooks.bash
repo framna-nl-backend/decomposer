@@ -1,5 +1,5 @@
 setup() {
-  mkdir -p "${TARGET_DIR}"
+  mkdir -p "${DECOMPOSER_TARGET_DIR}"
   mkdir -p "${TEST_WORKING_DIR}"
   mkdir -p "${TEST_REPOS_DIR}"
 

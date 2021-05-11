@@ -35,7 +35,7 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new commit in repository
   git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
@@ -54,7 +54,7 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # remove repository
   rm -rf "${TEST_REPOS_DIR}/alpha-lib"
@@ -70,7 +70,7 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new commit in repository
   git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
@@ -91,7 +91,7 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_commit_revision
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new commit in repository
   git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
@@ -112,7 +112,7 @@ SUITE_NAME=$( test_suite_name )
   export TEST_REPOS_COMMIT="${alpha_lib_revision_hash}"
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create decomposer.json with current commit
   create_decomposer_json alpha_branch_revision
@@ -128,7 +128,7 @@ SUITE_NAME=$( test_suite_name )
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new branch in repository with new commit
   git -C "${TEST_REPOS_DIR}/alpha-lib" checkout -b rc1
@@ -158,8 +158,8 @@ SUITE_NAME=$( test_suite_name )
   create_repository beta-lib
 
   # create usual clone of libraries
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
-  git clone "${TEST_REPOS_DIR}/beta-lib" "${TARGET_DIR}/Beta-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/beta-lib" "${DECOMPOSER_TARGET_DIR}/Beta-1.0"
 
   local commit_beta_lib_revision_hash=$(
     git -C "${TEST_REPOS_DIR}/beta-lib" \

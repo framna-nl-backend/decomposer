@@ -31,33 +31,33 @@ SUITE_NAME=$( test_suite_name )
 @test "${SUITE_NAME}: target directory doesn't exist" {
   create_decomposer_json alpha_psr4
 
-  export TARGET_DIR='/xxx'
+  export DECOMPOSER_TARGET_DIR='/xxx'
 
   run_decomposer install
   [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: TARGET_DIR '/xxx' is not a writable directory." ]
+  [ "${lines[0]}" = "decomposer: DECOMPOSER_TARGET_DIR '/xxx' is not a writable directory." ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
 
 @test "${SUITE_NAME}: target directory is a file" {
   create_decomposer_json alpha_psr4
 
-  export TARGET_DIR="${TEST_TMP_DIR}/file"
+  export DECOMPOSER_TARGET_DIR="${TEST_TMP_DIR}/file"
   touch "${TEST_TMP_DIR}/file"
 
   run_decomposer install
   [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: TARGET_DIR '${TEST_TMP_DIR}/file' is not a writable directory." ]
+  [ "${lines[0]}" = "decomposer: DECOMPOSER_TARGET_DIR '${TEST_TMP_DIR}/file' is not a writable directory." ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }
 
 @test "${SUITE_NAME}: target directory is not writable" {
   create_decomposer_json alpha_psr4
 
-  chmod -w "${TARGET_DIR}"
+  chmod -w "${DECOMPOSER_TARGET_DIR}"
 
   run_decomposer install
   [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: TARGET_DIR '${TARGET_DIR}' is not a writable directory." ]
+  [ "${lines[0]}" = "decomposer: DECOMPOSER_TARGET_DIR '${DECOMPOSER_TARGET_DIR}' is not a writable directory." ]
   [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
 }

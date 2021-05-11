@@ -160,7 +160,7 @@ SUITE_NAME=$( test_suite_name )
   local gamma_lib_revision_hash="$( create_repository gamma-lib )"
 
   # create usual clone of beta library
-  git clone "${TEST_REPOS_DIR}/beta-lib" "${TARGET_DIR}/Beta-1.0"
+  git clone "${TEST_REPOS_DIR}/beta-lib" "${DECOMPOSER_TARGET_DIR}/Beta-1.0"
   # remove beta repository
   rm -rf "${TEST_REPOS_DIR}/beta-lib"
 
@@ -187,12 +187,12 @@ SUITE_NAME=$( test_suite_name )
   local gamma_lib_revision_hash="$( create_repository gamma-lib )"
 
   # create usual clone of beta library
-  git clone "${TEST_REPOS_DIR}/beta-lib" "${TARGET_DIR}/Beta-1.0"
+  git clone "${TEST_REPOS_DIR}/beta-lib" "${DECOMPOSER_TARGET_DIR}/Beta-1.0"
   # create new commit in repository
   git -C "${TEST_REPOS_DIR}/beta-lib" commit \
     --allow-empty --message 'extra commit'
   # lock clone
-  touch "${TARGET_DIR}/Beta-1.0/.git/index.lock"
+  touch "${DECOMPOSER_TARGET_DIR}/Beta-1.0/.git/index.lock"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
@@ -200,7 +200,7 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[1]}" = "Installing Beta...failed (resetting changes failed)" ]
   [ "${lines[2]}" = "Installing Gamma...done" ]
 
-  chmod +w "${TARGET_DIR}/Beta-1.0/README"
+  chmod +w "${DECOMPOSER_TARGET_DIR}/Beta-1.0/README"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"

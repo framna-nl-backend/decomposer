@@ -8,4 +8,4 @@ export TEST_FIXTURES_DIR="${BATS_TEST_DIRNAME}/fixtures"
 export TEST_DECOMPOSER_PATH="${BATS_TEST_DIRNAME}/../bin/decomposer"
 
 # environment variables used by decomposer internally
-export TARGET_DIR="${TEST_TMP_DIR}/libs"
+export DECOMPOSER_TARGET_DIR="${TEST_TMP_DIR}/libs"

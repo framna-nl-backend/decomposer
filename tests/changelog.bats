@@ -35,12 +35,12 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   sleep 1
 
   # new commit in cloned library
-  git -C "${TARGET_DIR}/Alpha-1.0" commit \
+  git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" commit \
     --allow-empty --message 'extra commit'
 
   run_decomposer generate-changelog -t '2 seconds ago'
@@ -56,12 +56,12 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   sleep 1
 
   # new commit in cloned library
-  git -C "${TARGET_DIR}/Alpha-1.0" commit \
+  git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" commit \
     --allow-empty --message 'extra commit'
 
   run_decomposer generate-changelog  -f "${TEST_WORKING_DIR}/test.file" -t '2 seconds ago'
@@ -76,12 +76,12 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   sleep 1
 
   # new commit in cloned library
-  git -C "${TARGET_DIR}/Alpha-1.0" commit \
+  git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" commit \
     --allow-empty --message 'extra commit'
 
   mkdir "${TEST_WORKING_DIR}/changelogs"
@@ -98,13 +98,13 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   sleep 1
 
   # create new orphan commit in cloned library
-  git -C "${TARGET_DIR}/Alpha-1.0" checkout --orphan new_branch
-  git -C "${TARGET_DIR}/Alpha-1.0" commit \
+  git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" checkout --orphan new_branch
+  git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" commit \
     --allow-empty --message 'new commit'
 
   run_decomposer generate-changelog -t '2 seconds ago'
@@ -119,7 +119,7 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   sleep 1
 

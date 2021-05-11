@@ -96,7 +96,7 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new commit in repository and tag
   git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
@@ -121,7 +121,7 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new commit in repository and tag
   git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
@@ -146,7 +146,7 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new branch with new commit in repository
   git -C "${TEST_REPOS_DIR}/alpha-lib" checkout -b rc1
@@ -171,7 +171,7 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new commit in repository
   git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
@@ -197,7 +197,7 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_commit_revision
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new commit on top
   git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
@@ -226,7 +226,7 @@ SUITE_NAME=$( test_suite_name )
   git -C "${TEST_REPOS_DIR}/alpha-lib" tag alpha-lib-1.0 -a -m 'tag'
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   # create new commit on top
   git -C "${TEST_REPOS_DIR}/alpha-lib" commit \

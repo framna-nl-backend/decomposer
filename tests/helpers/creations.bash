@@ -44,7 +44,7 @@ create_lib_autoload_file() {
   local lib_name_version="$1"
   local fixture_name="$2"
 
-  cp "${TEST_FIXTURES_DIR}/autoload_lib/${fixture_name}.php" "${TARGET_DIR}/${lib_name_version}.php"
+  cp "${TEST_FIXTURES_DIR}/autoload_lib/${fixture_name}.php" "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php"
 }
 
 create_project_autoload_file() {

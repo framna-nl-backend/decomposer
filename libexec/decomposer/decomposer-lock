@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
+DECOMPOSER_TARGET_DIR=${DECOMPOSER_TARGET_DIR:-/var/www/libs/}
 
 TMP_FILE=$( mktemp )
 trap 'rm "${TMP_FILE}"' EXIT
@@ -97,7 +97,7 @@ write_locked_library() {
     library_target_dir="${name}-${version}${library_target_dir}"
   fi
 
-  cd "${TARGET_DIR}/${library_target_dir}" || return 1
+  cd "${DECOMPOSER_TARGET_DIR}/${library_target_dir}" || return 1
 
   if ! git fetch origin &> /dev/null; then
     printf -v "${status_text_variable}" 'fetching changes failed'

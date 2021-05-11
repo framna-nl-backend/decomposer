@@ -39,7 +39,7 @@ map_libraries_repo() {
       library_target_dir="${name}-${version}${library_target_dir}"
     fi
 
-    if ! "${function}" "${name}" "${TARGET_DIR}/${library_target_dir}"; then
+    if ! "${function}" "${name}" "${DECOMPOSER_TARGET_DIR}/${library_target_dir}"; then
       result=1
     fi
   done

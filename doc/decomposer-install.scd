@@ -22,7 +22,7 @@ process. On such a production environment, the *--no-dev* option should be then
 used.
 
 As a precaution to not wreak havoc on your development setup, _decomposer_ will
-not touch libraries in _TARGET_DIR_ that are manually installed using symbolic
+not touch libraries in _DECOMPOSER_TARGET_DIR_ that are manually installed using symbolic
 links or git worktree checkouts. However, do note that in case it is a normal
 git clone, _decomposer_ will reset the repo and throw away any local changes.
 
@@ -34,6 +34,6 @@ git clone, _decomposer_ will reset the repo and throw away any local changes.
 
 # ENVIRONMENT VARIABLES
 
-_TARGET_DIR_
+_DECOMPOSER_TARGET_DIR_
 	Define the location of the installed libraries++
 By default this is _/var/www/libs_

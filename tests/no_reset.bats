@@ -16,9 +16,9 @@ SUITE_NAME=$( test_suite_name )
   # tag current HEAD
   git -C "${TEST_REPOS_DIR}/alpha-lib" tag 1.0
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
   # modify file
-  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+  echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
@@ -27,7 +27,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
 }
 
 @test "${SUITE_NAME}: correct alternative tag with non commited modifications" {
@@ -38,9 +38,9 @@ SUITE_NAME=$( test_suite_name )
   # tag current HEAD
   git -C "${TEST_REPOS_DIR}/alpha-lib" tag v1.0
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
   # modify file
-  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+  echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
@@ -49,7 +49,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
 }
 
 @test "${SUITE_NAME}: correct annotated tag with non commited modifications" {
@@ -60,9 +60,9 @@ SUITE_NAME=$( test_suite_name )
   # tag current HEAD
   git -C "${TEST_REPOS_DIR}/alpha-lib" tag 1.0 -a -m 'tag'
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
   # modify file
-  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+  echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
@@ -71,7 +71,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
 }
 
 @test "${SUITE_NAME}: correct alternative annotated tag with non commited modifications" {
@@ -82,9 +82,9 @@ SUITE_NAME=$( test_suite_name )
   # tag current HEAD
   git -C "${TEST_REPOS_DIR}/alpha-lib" tag v1.0 -a -m 'tag'
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
   # modify file
-  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+  echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
@@ -93,7 +93,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
 }
 
 @test "${SUITE_NAME}: correct branch with non commited modifications" {
@@ -104,11 +104,11 @@ SUITE_NAME=$( test_suite_name )
   # create new branch
   git -C "${TEST_REPOS_DIR}/alpha-lib" checkout -b rc1
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
   # switch to new branch
-  git -C "${TARGET_DIR}/Alpha-1.0" checkout rc1
+  git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" checkout rc1
   # modify file
-  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+  echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
@@ -117,7 +117,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
 }
 
 @test "${SUITE_NAME}: correct commit with non commited modifications" {
@@ -128,9 +128,9 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_commit_revision
 
   # create usual clone of library
-  git clone "${TEST_REPOS_DIR}/alpha-lib" "${TARGET_DIR}/Alpha-1.0"
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
   # modify file
-  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+  echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
@@ -139,5 +139,5 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
 }

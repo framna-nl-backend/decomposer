@@ -25,6 +25,6 @@ Default is a _decomposer_new.json_ file in the current working directory
 
 # ENVIRONMENT VARIABLES
 
-_TARGET_DIR_
+_DECOMPOSER_TARGET_DIR_
 	Define the location of the installed libraries++
 By default this is _/var/www/libs_

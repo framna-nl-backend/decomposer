@@ -28,7 +28,7 @@ process. On such a production environment, the \fB--no-dev\fR option should be t
 used.
 .P
 As a precaution to not wreak havoc on your development setup, \fIdecomposer\fR will
-not touch libraries in \fITARGET_DIR\fR that are manually installed using symbolic
+not touch libraries in \fIDECOMPOSER_TARGET_DIR\fR that are manually installed using symbolic
 links or git worktree checkouts. However, do note that in case it is a normal
 git clone, \fIdecomposer\fR will reset the repo and throw away any local changes.
 .P
@@ -42,7 +42,7 @@ Do not generate the outdated check in the include file
 .RE
 .SH ENVIRONMENT VARIABLES
 .P
-\fITARGET_DIR\fR
+\fIDECOMPOSER_TARGET_DIR\fR
 .RS 4
 Define the location of the installed libraries
 .br

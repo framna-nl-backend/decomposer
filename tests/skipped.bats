@@ -19,10 +19,10 @@ SUITE_NAME=$( test_suite_name )
   git -C "${TEST_TMP_DIR}/Alpha" commit \
     --allow-empty --message 'custom commit'
   # create symlink in target folder with version
-  ln -s "${TEST_TMP_DIR}/Alpha" "${TARGET_DIR}/Alpha-1.0"
+  ln -s "${TEST_TMP_DIR}/Alpha" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
 
   local custom_alpha_lib_revision_hash=$(
-    git -C "${TARGET_DIR}/Alpha-1.0" \
+    git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" \
       rev-parse HEAD
   )
 
@@ -43,13 +43,13 @@ SUITE_NAME=$( test_suite_name )
   git clone "${TEST_REPOS_DIR}/alpha-lib" "${TEST_TMP_DIR}/Alpha"
   # create worktree in target folder with version
   git -C "${TEST_TMP_DIR}/Alpha" worktree \
-    add "${TARGET_DIR}/Alpha-1.0"
+    add "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
   # add some local modifications in that worktree
-  git -C "${TARGET_DIR}/Alpha-1.0" commit \
+  git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" commit \
     --allow-empty --message 'custom commit'
 
   local custom_alpha_lib_revision_hash=$(
-    git -C "${TARGET_DIR}/Alpha-1.0" \
+    git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" \
       rev-parse HEAD
   )
 
@@ -67,13 +67,13 @@ SUITE_NAME=$( test_suite_name )
   create_repository alpha-lib
 
   # create library as package with custom file
-  mkdir "${TARGET_DIR}/Alpha-1.0"
-  echo change > "${TARGET_DIR}/Alpha-1.0/README"
+  mkdir "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
+  echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
   [ "${status}" -eq 0 ]
   [ "${lines[0]}" = "Installing Alpha...skipped (not a git repository)" ]
 
   # assert there was no change to the file
-  [ $( cat "${TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
 }

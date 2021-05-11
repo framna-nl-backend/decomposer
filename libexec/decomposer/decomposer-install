@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TARGET_DIR=${TARGET_DIR:-/var/www/libs/}
+DECOMPOSER_TARGET_DIR=${DECOMPOSER_TARGET_DIR:-/var/www/libs/}
 
 INCLUDE_OUTDATED_CHECK=1
 
@@ -26,8 +26,8 @@ validate_arguments() {
     exit_error 'No decomposer.json found.'
   fi
 
-  if ! [ -d "${TARGET_DIR}" ] || ! [ -w "${TARGET_DIR}" ]; then
-    exit_error "TARGET_DIR '${TARGET_DIR}' is not a writable directory."
+  if ! [ -d "${DECOMPOSER_TARGET_DIR}" ] || ! [ -w "${DECOMPOSER_TARGET_DIR}" ]; then
+    exit_error "DECOMPOSER_TARGET_DIR '${DECOMPOSER_TARGET_DIR}' is not a writable directory."
   fi
 }
 
@@ -48,7 +48,7 @@ install_library() {
     library_target_dir="${name}-${version}${library_target_dir}"
   fi
 
-  cd "${TARGET_DIR}" || return 2
+  cd "${DECOMPOSER_TARGET_DIR}" || return 2
 
   if ! [ -d "${name}-${version}" ]; then
     if ! git clone "${url}" "${library_target_dir}" &> /dev/null; then
@@ -145,7 +145,7 @@ create_library_autoload() {
     library_target_dir="${name}-${version}${library_target_dir}"
   fi
 
-  cd "${TARGET_DIR}" || return 1
+  cd "${DECOMPOSER_TARGET_DIR}" || return 1
 
   local psr0_path psr4_prefix psr4_path
 
