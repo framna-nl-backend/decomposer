@@ -1,5 +1,5 @@
 FROM centos:centos7
-MAINTAINER s.molenaar@m2mobi.com
+MAINTAINER sean.molenaar@moveagency.com
 WORKDIR /tmp/decomposer
 COPY . .
 
