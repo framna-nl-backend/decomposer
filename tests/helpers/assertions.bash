@@ -22,6 +22,13 @@ assert_lib_installed() {
   [ "${expected_head_hash}" == "${result_head_hash}" ]
 }
 
+assert_lib_not_installed() {
+  local lib_name_version="$1"
+  local expected_head_hash="$2"
+
+  ! [ -d "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" ]
+}
+
 assert_lib_contains() {
   local lib_name_version="$1"
   local revision="$2"
@@ -51,6 +58,13 @@ assert_lib_autoload_file() {
   )
 
   [ "${expected_content}" == "${result_content}" ]
+}
+
+assert_lib_no_autoload_file() {
+  local lib_name_version="$1"
+  local fixture_name="$2"
+
+  ! [ -f "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php" ]
 }
 
 assert_project_autoload_file_without_check() {

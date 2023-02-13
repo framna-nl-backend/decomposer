@@ -17,6 +17,16 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[2]}" = "Validating Gamma...OK" ]
 }
 
+@test "${SUITE_NAME}: valid decomposer.json file with development-only indicator" {
+  create_decomposer_json alpha_psr4 beta_dev gamma_psr0
+
+  run_decomposer validate
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Validating Alpha...OK" ]
+  [ "${lines[1]}" = "Validating Beta...OK" ]
+  [ "${lines[2]}" = "Validating Gamma...OK" ]
+}
+
 @test "${SUITE_NAME}: decomposer.json doesn't contain JSON content" {
   create_decomposer_json not_json_content
 
@@ -120,5 +130,15 @@ SUITE_NAME=$( test_suite_name )
   [ "${status}" -eq 1 ]
   [ "${lines[0]}" = "Validating Alpha...OK" ]
   [ "${lines[1]}" = "Validating Beta...FAIL (conflicting psr0 and psr4)" ]
+  [ "${lines[2]}" = "Validating Gamma...OK" ]
+}
+
+@test "${SUITE_NAME}: library dev not a boolean" {
+  create_decomposer_json alpha_psr4 beta_dev_not_boolean gamma_psr0
+
+  run_decomposer validate
+  [ "${status}" -eq 1 ]
+  [ "${lines[0]}" = "Validating Alpha...OK" ]
+  [ "${lines[1]}" = "Validating Beta...FAIL (invalid development-only indicator)" ]
   [ "${lines[2]}" = "Validating Gamma...OK" ]
 }

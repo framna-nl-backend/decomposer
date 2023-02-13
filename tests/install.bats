@@ -261,3 +261,34 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
+@test "${SUITE_NAME}: single new PSR-4 library (not development-only)" {
+  create_decomposer_json alpha_nodev
+
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
+
+  assert_lib_autoload_file Alpha-1.0 alpha_psr4
+
+  assert_project_autoload_file Alpha-1.0
+}
+
+@test "${SUITE_NAME}: single new PSR-4 library (development-only)" {
+  create_decomposer_json alpha_dev
+
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
+
+  assert_lib_autoload_file Alpha-1.0 alpha_psr4
+
+  assert_project_autoload_file Alpha-1.0
+}

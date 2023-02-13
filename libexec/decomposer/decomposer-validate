@@ -52,6 +52,12 @@ validate_library() {
     return 1
   fi
 
+  if [ "$( jq 'has("development-only")' <<< "${object}" )" = 'true' ] \
+    && ! [ "$( jq -r '."development-only"|type' <<< "${object}" )" = 'boolean' ]; then
+    printf -v "${status_text_variable}" 'invalid development-only indicator'
+    return 1
+  fi
+
   if [ "$( jq 'has("revision")' <<< "${object}" )" = 'true' ] \
     && ! [ "$( jq -r '.revision|type' <<< "${object}" )" = 'string' ]; then
     printf -v "${status_text_variable}" 'invalid revision'

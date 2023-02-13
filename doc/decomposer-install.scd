@@ -30,7 +30,8 @@ git clone, _decomposer_ will reset the repo and throw away any local changes.
 # OPTIONS
 
 *--no-dev*
-	Do not generate the outdated check in the include file
+	Do not install development-only dependencies and also do not generate the
+	outdated check in the include file
 
 # ENVIRONMENT VARIABLES
 

@@ -3,12 +3,14 @@
 DECOMPOSER_TARGET_DIR=${DECOMPOSER_TARGET_DIR:-/var/www/libs/}
 
 INCLUDE_OUTDATED_CHECK=1
+INSTALL_DEV_DEPENDENCIES=1
 
 parse_arguments() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
       "--no-dev")
         INCLUDE_OUTDATED_CHECK=0
+        INSTALL_DEV_DEPENDENCIES=0
         ;;
       *)
         printf "Unknown option %s\n" "$1"
@@ -35,6 +37,15 @@ install_library() {
   local name="$1"
   local object="$2"
   local status_text_variable="$3"
+
+  local dev
+
+  dev=$( jq -r '."development-only"' <<< "${object}" )
+
+  if [ "$dev" = "true" -a $INSTALL_DEV_DEPENDENCIES = 0 ]; then
+    printf -v "${status_text_variable}" 'development-only dependency'
+    return 2
+  fi
 
   local url version library_target_dir
 
@@ -133,6 +144,14 @@ install_library() {
 create_library_autoload() {
   local name="$1"
   local object="$2"
+
+  local dev
+
+  dev=$( jq -r '."development-only"' <<< "${object}" )
+
+  if [ "$dev" = "true" -a $INSTALL_DEV_DEPENDENCIES = 0 ]; then
+    return 2
+  fi
 
   local version library_target_dir
 
