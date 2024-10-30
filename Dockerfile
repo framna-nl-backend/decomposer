@@ -1,4 +1,4 @@
-FROM almalinux:9-minimal
+FROM almalinux:9
 MAINTAINER sean.molenaar@moveagency.com
 WORKDIR /tmp/decomposer
 COPY . .
