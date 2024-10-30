@@ -39,6 +39,7 @@ jobs:
         run: |
           # shellcheck disable=SC2086
           files=$(find share/ libexec/ -type f)
+          # shellcheck disable=SC2086
           shellcheck --format=checkstyle --shell=bash bin/decomposer $files > shellcheck-result.xml
 
       - uses: staabm/annotate-pull-request-from-checkstyle-action@v1
