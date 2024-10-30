@@ -1,10 +1,10 @@
-FROM centos:centos7
+FROM almalinux:9-minimal
 MAINTAINER sean.molenaar@moveagency.com
 WORKDIR /tmp/decomposer
 COPY . .
 
-RUN yum -y install epel-release
-RUN yum -y install make scdoc man jq git
+RUN dnf -y install epel-release
+RUN dnf -y install make scdoc man jq git
 RUN make doc install
 
 ENTRYPOINT ["/usr/bin/decomposer"]
