@@ -6,9 +6,9 @@ load helpers/assertions
 
 # This suite tests the "lock" command
 
-SUITE_NAME=$( test_suite_name )
+BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
-@test "${SUITE_NAME}: new decomposer.json pointing to inaccessible location" {
+@test "new decomposer.json pointing to inaccessible location" {
   create_decomposer_json alpha_psr4
 
   run_decomposer lock --file '/root/changelog.fail'
@@ -18,7 +18,7 @@ SUITE_NAME=$( test_suite_name )
   assert_file_not_exists "/root/changelog.fail"
 }
 
-@test "${SUITE_NAME}: new decomposer.json pointing to non writable file" {
+@test "new decomposer.json pointing to non writable file" {
   create_decomposer_json alpha_psr4
 
   touch "${TEST_WORKING_DIR}/decomposer_new.json"
@@ -29,7 +29,7 @@ SUITE_NAME=$( test_suite_name )
   assert_line "decomposer: File '${TEST_WORKING_DIR}/decomposer_new.json' is not writable."
 }
 
-@test "${SUITE_NAME}: no change if tag" {
+@test "no change if tag" {
   create_decomposer_json alpha_tag_version
 
   create_repository alpha-lib
@@ -48,7 +48,7 @@ SUITE_NAME=$( test_suite_name )
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_tag_version
 }
 
-@test "${SUITE_NAME}: failed to fetch changes" {
+@test "failed to fetch changes" {
   create_decomposer_json alpha_branch_revision
 
   create_repository alpha-lib
@@ -64,7 +64,7 @@ SUITE_NAME=$( test_suite_name )
   assert_output "Locking Alpha...failed (fetching changes failed)"
 }
 
-@test "${SUITE_NAME}: no change if annotated tag" {
+@test "no change if annotated tag" {
   create_decomposer_json alpha_tag_revision
 
   create_repository alpha-lib
@@ -83,7 +83,7 @@ SUITE_NAME=$( test_suite_name )
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_tag_revision
 }
 
-@test "${SUITE_NAME}: no change if commit" {
+@test "no change if commit" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   # create decomposer.json with current commit
@@ -104,7 +104,7 @@ SUITE_NAME=$( test_suite_name )
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_commit_revision
 }
 
-@test "${SUITE_NAME}: branch replaced with commit" {
+@test "branch replaced with commit" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   # create branch in repository
@@ -124,7 +124,7 @@ SUITE_NAME=$( test_suite_name )
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_commit_revision
 }
 
-@test "${SUITE_NAME}: new branch replaced with commit" {
+@test "new branch replaced with commit" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   # create usual clone of library
@@ -151,7 +151,7 @@ SUITE_NAME=$( test_suite_name )
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_commit_revision
 }
 
-@test "${SUITE_NAME}: multiple libraries" {
+@test "multiple libraries" {
   create_decomposer_json alpha_tag_version beta_psr0
 
   create_repository alpha-lib

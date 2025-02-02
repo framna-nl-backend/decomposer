@@ -6,9 +6,9 @@ load helpers/assertions
 
 # This suite tests the "target-dir" field feature
 
-SUITE_NAME=$( test_suite_name )
+BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
-@test "${SUITE_NAME}: single new PSR-0 library" {
+@test "single new PSR-0 library" {
   create_decomposer_json beta_psr0_target_dir
 
   local beta_lib_revision_hash="$( create_repository beta-lib )"

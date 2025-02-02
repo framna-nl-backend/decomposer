@@ -6,9 +6,9 @@ load helpers/assertions
 
 # This suite tests the naming of libraries
 
-SUITE_NAME=$( test_suite_name )
+BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
-@test "${SUITE_NAME}: contains a dot" {
+@test "contains a dot" {
   create_decomposer_json alpha_dot
 
   local alpha_lib_revision_hash="$( create_repository alpha.lib )"
@@ -24,7 +24,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha.Lib-1.0
 }
 
-@test "${SUITE_NAME}: contains a minus" {
+@test "contains a minus" {
   create_decomposer_json alpha_minus
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -40,7 +40,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-Lib-1.0
 }
 
-@test "${SUITE_NAME}: contains an underscore" {
+@test "contains an underscore" {
   create_decomposer_json alpha_underscore
 
   local alpha_lib_revision_hash="$( create_repository alpha_lib )"

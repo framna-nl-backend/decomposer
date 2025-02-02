@@ -6,9 +6,9 @@ load helpers/assertions
 
 # This suite tests the "install" command
 
-SUITE_NAME=$( test_suite_name )
+BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
-@test "${SUITE_NAME}: single new PSR-4 library" {
+@test "single new PSR-4 library" {
   create_decomposer_json alpha_psr4
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -24,7 +24,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: single new PSR-0 library" {
+@test "single new PSR-0 library" {
   create_decomposer_json beta_psr0
 
   local beta_lib_revision_hash="$( create_repository beta-lib )"
@@ -40,7 +40,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Beta-1.0
 }
 
-@test "${SUITE_NAME}: multiple new libraries" {
+@test "multiple new libraries" {
   create_decomposer_json alpha_psr4 beta_psr0
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -60,7 +60,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0 Beta-1.0
 }
 
-@test "${SUITE_NAME}: overwrite existing library autoload file" {
+@test "overwrite existing library autoload file" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -75,7 +75,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_autoload_file Alpha-1.0 alpha_psr4
 }
 
-@test "${SUITE_NAME}: overwrite existing project autoload file" {
+@test "overwrite existing project autoload file" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -90,7 +90,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: existing library fetches new tag" {
+@test "existing library fetches new tag" {
   create_decomposer_json alpha_tag_version
 
   create_repository alpha-lib
@@ -115,7 +115,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing library fetches new annotated tag" {
+@test "existing library fetches new annotated tag" {
   create_decomposer_json alpha_tag_version
 
   create_repository alpha-lib
@@ -140,7 +140,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing library fetches new branch" {
+@test "existing library fetches new branch" {
   create_decomposer_json alpha_branch_revision
 
   create_repository alpha-lib
@@ -165,7 +165,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${branch_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing library fetches new commits" {
+@test "existing library fetches new commits" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -189,7 +189,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing library doesn't fetch unrelated changes for commit" {
+@test "existing library doesn't fetch unrelated changes for commit" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   # create decomposer.json with current commit
@@ -216,7 +216,7 @@ SUITE_NAME=$( test_suite_name )
   ! assert_lib_contains  Alpha-1.0 "${commit_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing library doesn't fetch unrelated changes for tag" {
+@test "existing library doesn't fetch unrelated changes for tag" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   # create decomposer.json
@@ -245,7 +245,7 @@ SUITE_NAME=$( test_suite_name )
   ! assert_lib_contains  Alpha-1.0 "${commit_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: single new PSR-4 library with multiple paths" {
+@test "single new PSR-4 library with multiple paths" {
   create_decomposer_json alpha_psr4_multi
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -261,7 +261,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: single new PSR-4 library (not development-only)" {
+@test "single new PSR-4 library (not development-only)" {
   create_decomposer_json alpha_nodev
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -277,7 +277,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: single new PSR-4 library (development-only)" {
+@test "single new PSR-4 library (development-only)" {
   create_decomposer_json alpha_dev
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"

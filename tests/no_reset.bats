@@ -6,9 +6,9 @@ load helpers/assertions
 
 # This suite tests the different cases where existing libraries should not be reset
 
-SUITE_NAME=$( test_suite_name )
+BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
-@test "${SUITE_NAME}: correct tag with non commited modifications" {
+@test "correct tag with non commited modifications" {
   create_decomposer_json alpha_tag_version
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -30,7 +30,7 @@ SUITE_NAME=$( test_suite_name )
   assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
-@test "${SUITE_NAME}: correct alternative tag with non commited modifications" {
+@test "correct alternative tag with non commited modifications" {
   create_decomposer_json alpha_tag_version
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -52,7 +52,7 @@ SUITE_NAME=$( test_suite_name )
   assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
-@test "${SUITE_NAME}: correct annotated tag with non commited modifications" {
+@test "correct annotated tag with non commited modifications" {
   create_decomposer_json alpha_tag_version
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -74,7 +74,7 @@ SUITE_NAME=$( test_suite_name )
   assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
-@test "${SUITE_NAME}: correct alternative annotated tag with non commited modifications" {
+@test "correct alternative annotated tag with non commited modifications" {
   create_decomposer_json alpha_tag_version
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -96,7 +96,7 @@ SUITE_NAME=$( test_suite_name )
   assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
-@test "${SUITE_NAME}: correct branch with non commited modifications" {
+@test "correct branch with non commited modifications" {
   create_decomposer_json alpha_branch_revision
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -120,7 +120,7 @@ SUITE_NAME=$( test_suite_name )
   assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
-@test "${SUITE_NAME}: correct commit with non commited modifications" {
+@test "correct commit with non commited modifications" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   # create decomposer.json with current commit

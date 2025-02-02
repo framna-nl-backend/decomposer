@@ -6,9 +6,9 @@ load helpers/assertions
 
 # This suite tests the different cases where existing libraries should be skipped
 
-SUITE_NAME=$( test_suite_name )
+BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
-@test "${SUITE_NAME}: existing library as symlink" {
+@test "existing library as symlink" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -34,7 +34,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${custom_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing library as git worktree" {
+@test "existing library as git worktree" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib
@@ -61,7 +61,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${custom_alpha_lib_revision_hash}"
 }
 
-@test "${SUITE_NAME}: existing library but not a git repository" {
+@test "existing library but not a git repository" {
   create_decomposer_json alpha_psr4
 
   create_repository alpha-lib

@@ -6,9 +6,9 @@ load helpers/assertions
 
 # This suite tests the "install" command with the --no-dev option
 
-SUITE_NAME=$( test_suite_name )
+BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
-@test "${SUITE_NAME}: single new PSR-4 library" {
+@test "single new PSR-4 library" {
   create_decomposer_json alpha_psr4
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -24,7 +24,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file_without_check Alpha-1.0
 }
 
-@test "${SUITE_NAME}: single new PSR-0 library" {
+@test "single new PSR-0 library" {
   create_decomposer_json beta_psr0
 
   local beta_lib_revision_hash="$( create_repository beta-lib )"
@@ -40,7 +40,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file_without_check Beta-1.0
 }
 
-@test "${SUITE_NAME}: multiple new libraries" {
+@test "multiple new libraries" {
   create_decomposer_json alpha_psr4 beta_psr0
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -60,7 +60,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file_without_check Alpha-1.0 Beta-1.0
 }
 
-@test "${SUITE_NAME}: single new PSR-4 library (not development-only)" {
+@test "single new PSR-4 library (not development-only)" {
   create_decomposer_json alpha_nodev
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -76,7 +76,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file_without_check Alpha-1.0
 }
 
-@test "${SUITE_NAME}: single new PSR-4 library (development-only)" {
+@test "single new PSR-4 library (development-only)" {
   create_decomposer_json alpha_dev
 
   run_decomposer install --no-dev

@@ -6,9 +6,9 @@ load helpers/assertions
 
 # This suite tests the different possible version and revision usages
 
-SUITE_NAME=$( test_suite_name )
+BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
-@test "${SUITE_NAME}: tag from version" {
+@test "tag from version" {
   create_decomposer_json alpha_tag_version
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -29,7 +29,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: annotated tag from version" {
+@test "annotated tag from version" {
   create_decomposer_json alpha_tag_version
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -50,7 +50,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: alternative tag from version" {
+@test "alternative tag from version" {
   create_decomposer_json alpha_tag_version
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -71,7 +71,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: alternative annotated tag from version" {
+@test "alternative annotated tag from version" {
   create_decomposer_json alpha_tag_version
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -92,7 +92,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: tag from revision" {
+@test "tag from revision" {
   create_decomposer_json alpha_tag_revision
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -113,7 +113,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: annotated tag from revision" {
+@test "annotated tag from revision" {
   create_decomposer_json alpha_tag_revision
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
@@ -134,7 +134,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: branch from revision" {
+@test "branch from revision" {
   create_decomposer_json alpha_branch_revision
 
   create_repository alpha-lib
@@ -160,7 +160,7 @@ SUITE_NAME=$( test_suite_name )
   assert_project_autoload_file Alpha-1.0
 }
 
-@test "${SUITE_NAME}: commit from revision" {
+@test "commit from revision" {
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   # create decomposer.json with current commit
