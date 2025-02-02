@@ -42,7 +42,7 @@ install_library() {
 
   dev=$( jq -r '."development-only"' <<< "${object}" )
 
-  if [ "$dev" = "true" -a $INSTALL_DEV_DEPENDENCIES = 0 ]; then
+  if [ "$dev" = "true" ] && [ $INSTALL_DEV_DEPENDENCIES = 0 ]; then
     printf -v "${status_text_variable}" 'development-only dependency'
     return 2
   fi
@@ -149,7 +149,7 @@ create_library_autoload() {
 
   dev=$( jq -r '."development-only"' <<< "${object}" )
 
-  if [ "$dev" = "true" -a $INSTALL_DEV_DEPENDENCIES = 0 ]; then
+  if [ "$dev" = "true" ] && [ $INSTALL_DEV_DEPENDENCIES = 0 ]; then
     return 2
   fi
 
