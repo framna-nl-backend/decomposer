@@ -12,8 +12,8 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_psr4
 
   run_decomposer lock --file '/root/changelog.fail'
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: File '/root/changelog.fail' is not writable." ]
+  assert_failure
+  assert_line "decomposer: File '/root/changelog.fail' is not writable."
 
   assert_file_not_exists "/root/changelog.fail"
 }
@@ -25,8 +25,8 @@ SUITE_NAME=$( test_suite_name )
   chmod -w "${TEST_WORKING_DIR}/decomposer_new.json"
 
   run_decomposer lock --file "${TEST_WORKING_DIR}/decomposer_new.json"
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: File '${TEST_WORKING_DIR}/decomposer_new.json' is not writable." ]
+  assert_failure
+  assert_line "decomposer: File '${TEST_WORKING_DIR}/decomposer_new.json' is not writable."
 }
 
 @test "${SUITE_NAME}: no change if tag" {
@@ -42,8 +42,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer lock
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Locking Alpha...skipped (already locked)" ]
+  assert_success
+  assert_output "Locking Alpha...skipped (already locked)"
 
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_tag_version
 }
@@ -60,8 +60,8 @@ SUITE_NAME=$( test_suite_name )
   rm -rf "${TEST_REPOS_DIR}/alpha-lib"
 
   run_decomposer lock
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Locking Alpha...failed (fetching changes failed)" ]
+  assert_success
+  assert_output "Locking Alpha...failed (fetching changes failed)"
 }
 
 @test "${SUITE_NAME}: no change if annotated tag" {
@@ -77,8 +77,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer lock
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Locking Alpha...skipped (already locked)" ]
+  assert_success
+  assert_output "Locking Alpha...skipped (already locked)"
 
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_tag_revision
 }
@@ -98,8 +98,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer lock
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Locking Alpha...skipped (already locked)" ]
+  assert_success
+  assert_output "Locking Alpha...skipped (already locked)"
 
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_commit_revision
 }
@@ -118,8 +118,8 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_branch_revision
 
   run_decomposer lock
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Locking Alpha...done" ]
+  assert_success
+  assert_output "Locking Alpha...done"
 
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_commit_revision
 }
@@ -145,8 +145,8 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_branch_revision
 
   run_decomposer lock
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Locking Alpha...done" ]
+  assert_success
+  assert_output "Locking Alpha...done"
 
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_commit_revision
 }
@@ -168,9 +168,9 @@ SUITE_NAME=$( test_suite_name )
   export TEST_REPOS_REVISION="${commit_beta_lib_revision_hash}"
 
   run_decomposer lock
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Locking Alpha...skipped (already locked)" ]
-  [ "${lines[1]}" = "Locking Beta...done" ]
+  assert_success
+  assert_line "Locking Alpha...skipped (already locked)"
+  assert_line "Locking Beta...done"
 
   assert_decomposer_file "${TEST_WORKING_DIR}/decomposer_new.json" alpha_tag_version beta_custom_revision
 }

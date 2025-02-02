@@ -12,8 +12,8 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_psr4
 
   run_decomposer generate-changelog --file '/root/changelog.fail'
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: Changelog file '/root/changelog.fail' is not writable." ]
+  assert_failure
+  assert_line "decomposer: Changelog file '/root/changelog.fail' is not writable."
 
   assert_file_not_exists "/root/changelog.fail"
 }
@@ -25,8 +25,8 @@ SUITE_NAME=$( test_suite_name )
   chmod -w "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
 
   run_decomposer generate-changelog --file "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: Changelog file '${TEST_WORKING_DIR}/decomposer.diffnotes.md' is not writable." ]
+  assert_failure
+  assert_line "decomposer: Changelog file '${TEST_WORKING_DIR}/decomposer.diffnotes.md' is not writable."
 }
 
 @test "${SUITE_NAME}: writes lib log, default file" {
@@ -44,7 +44,7 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer generate-changelog -t '2 seconds ago'
-  [ "${status}" -eq 0 ]
+  assert_success
 
   cat "${TEST_WORKING_DIR}/decomposer.diffnotes.md"
   assert_changelog_file "${TEST_WORKING_DIR}/decomposer.diffnotes.md" changelog_lib_add
@@ -65,7 +65,7 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer generate-changelog  -f "${TEST_WORKING_DIR}/test.file" -t '2 seconds ago'
-  [ "${status}" -eq 0 ]
+  assert_success
 
   assert_changelog_file "${TEST_WORKING_DIR}/test.file" changelog_lib_add
 }
@@ -87,7 +87,7 @@ SUITE_NAME=$( test_suite_name )
   mkdir "${TEST_WORKING_DIR}/changelogs"
 
   run_decomposer generate-changelog --file changelogs/test.file -t '2 seconds ago'
-  [ "${status}" -eq 0 ]
+  assert_success
 
   assert_changelog_file "${TEST_WORKING_DIR}/changelogs/test.file" changelog_lib_add
 }
@@ -108,7 +108,7 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'new commit'
 
   run_decomposer generate-changelog -t '2 seconds ago'
-  [ "${status}" -eq 0 ]
+  assert_success
 
   assert_changelog_file "${TEST_WORKING_DIR}/decomposer.diffnotes.md" changelog_lib_both
 }
@@ -129,7 +129,7 @@ SUITE_NAME=$( test_suite_name )
         --allow-empty --message 'new commit'
 
   run_decomposer generate-changelog -t '2 seconds ago'
-  [ "${status}" -eq 0 ]
+  assert_success
 
   assert_changelog_file "${TEST_WORKING_DIR}/decomposer.diffnotes.md" changelog_project_both
 }

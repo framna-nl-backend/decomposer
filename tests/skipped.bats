@@ -27,8 +27,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...skipped (symlink)" ]
+  assert_success
+  assert_output "Installing Alpha...skipped (symlink)"
 
   # assert there was no change to the library
   assert_lib_installed Alpha-1.0 "${custom_alpha_lib_revision_hash}"
@@ -54,8 +54,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...skipped (git worktree)" ]
+  assert_success
+  assert_output "Installing Alpha...skipped (git worktree)"
 
   # assert there was no change to the library
   assert_lib_installed Alpha-1.0 "${custom_alpha_lib_revision_hash}"
@@ -71,8 +71,8 @@ SUITE_NAME=$( test_suite_name )
   echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...skipped (not a git repository)" ]
+  assert_success
+  assert_output "Installing Alpha...skipped (not a git repository)"
 
   # assert there was no change to the file
   assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'

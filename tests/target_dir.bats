@@ -14,8 +14,8 @@ SUITE_NAME=$( test_suite_name )
   local beta_lib_revision_hash="$( create_repository beta-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Beta...done" ]
+  assert_success
+  assert_output "Installing Beta...done"
 
   assert_lib_installed 'Beta-1.0/Target' "${beta_lib_revision_hash}"
 

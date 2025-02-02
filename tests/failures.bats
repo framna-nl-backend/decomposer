@@ -16,10 +16,10 @@ SUITE_NAME=$( test_suite_name )
   local gamma_lib_revision_hash="$( create_repository gamma-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...failed (cloning git repository failed)" ]
-  [ "${lines[2]}" = "Installing Gamma...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...failed (cloning git repository failed)"
+  assert_line "Installing Gamma...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
@@ -38,10 +38,10 @@ SUITE_NAME=$( test_suite_name )
   local gamma_lib_revision_hash="$( create_repository gamma-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...failed (revision '1.2.3' not found)" ]
-  [ "${lines[2]}" = "Installing Gamma...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...failed (revision '1.2.3' not found)"
+  assert_line "Installing Gamma...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
@@ -60,10 +60,10 @@ SUITE_NAME=$( test_suite_name )
   local gamma_lib_revision_hash="$( create_repository gamma-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...failed (revision 'foo' not found)" ]
-  [ "${lines[2]}" = "Installing Gamma...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...failed (revision 'foo' not found)"
+  assert_line "Installing Gamma...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
@@ -82,10 +82,10 @@ SUITE_NAME=$( test_suite_name )
   local gamma_lib_revision_hash="$( create_repository gamma-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...failed (revision '301939ad0133ef' not found)" ]
-  [ "${lines[2]}" = "Installing Gamma...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...failed (revision '301939ad0133ef' not found)"
+  assert_line "Installing Gamma...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
@@ -110,10 +110,10 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_psr4 beta_custom_revision gamma_psr0
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...failed (revision '${TEST_REPOS_REVISION}' not found)" ]
-  [ "${lines[2]}" = "Installing Gamma...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...failed (revision '${TEST_REPOS_REVISION}' not found)"
+  assert_line "Installing Gamma...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
@@ -138,10 +138,10 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_psr4 beta_custom_revision gamma_psr0
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...failed (revision '${TEST_REPOS_REVISION}' not found)" ]
-  [ "${lines[2]}" = "Installing Gamma...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...failed (revision '${TEST_REPOS_REVISION}' not found)"
+  assert_line "Installing Gamma...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
@@ -165,10 +165,10 @@ SUITE_NAME=$( test_suite_name )
   rm -rf "${TEST_REPOS_DIR}/beta-lib"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...failed (fetching changes failed)" ]
-  [ "${lines[2]}" = "Installing Gamma...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...failed (fetching changes failed)"
+  assert_line "Installing Gamma...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Gamma-1.0 "${gamma_lib_revision_hash}"
@@ -195,10 +195,10 @@ SUITE_NAME=$( test_suite_name )
   touch "${DECOMPOSER_TARGET_DIR}/Beta-1.0/.git/index.lock"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...failed (resetting changes failed)" ]
-  [ "${lines[2]}" = "Installing Gamma...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...failed (resetting changes failed)"
+  assert_line "Installing Gamma...done"
 
   chmod +w "${DECOMPOSER_TARGET_DIR}/Beta-1.0/README"
 

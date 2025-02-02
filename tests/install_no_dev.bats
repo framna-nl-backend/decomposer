@@ -14,8 +14,8 @@ SUITE_NAME=$( test_suite_name )
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   run_decomposer install --no-dev
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -30,8 +30,8 @@ SUITE_NAME=$( test_suite_name )
   local beta_lib_revision_hash="$( create_repository beta-lib )"
 
   run_decomposer install --no-dev
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Beta...done" ]
+  assert_success
+  assert_output "Installing Beta...done"
 
   assert_lib_installed Beta-1.0 "${beta_lib_revision_hash}"
 
@@ -47,9 +47,9 @@ SUITE_NAME=$( test_suite_name )
   local beta_lib_revision_hash="$( create_repository beta-lib )"
 
   run_decomposer install --no-dev
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Beta-1.0 "${beta_lib_revision_hash}"
@@ -66,8 +66,8 @@ SUITE_NAME=$( test_suite_name )
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   run_decomposer install --no-dev
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -80,8 +80,8 @@ SUITE_NAME=$( test_suite_name )
   create_decomposer_json alpha_dev
 
   run_decomposer install --no-dev
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...skipped (development-only dependency)" ]
+  assert_success
+  assert_output "Installing Alpha...skipped (development-only dependency)"
 
   assert_lib_not_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 

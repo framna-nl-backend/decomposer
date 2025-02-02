@@ -1,3 +1,4 @@
+bats_load_library bats-assert
 bats_load_library bats-file
 bats_load_library bats-support
 
@@ -22,7 +23,7 @@ assert_lib_installed() {
       rev-parse --verify HEAD
   )
 
-  [ "${expected_head_hash}" == "${result_head_hash}" ]
+  assert_equal "${expected_head_hash}" "${result_head_hash}"
 }
 
 assert_lib_not_installed() {
@@ -43,7 +44,7 @@ assert_lib_contains() {
       cat-file -t "${revision}" 2> /dev/null
   )
 
-  [ -n "${object_type}" ]
+  assert [ -n "${object_type}" ]
 }
 
 assert_lib_autoload_file() {
@@ -60,7 +61,7 @@ assert_lib_autoload_file() {
     cat "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php"
   )
 
-  [ "${expected_content}" == "${result_content}" ]
+  assert_equal "${expected_content}" "${result_content}"
 }
 
 assert_lib_no_autoload_file() {
@@ -87,7 +88,7 @@ assert_project_autoload_file_without_check() {
     cat "${TEST_WORKING_DIR}/decomposer.autoload.inc.php"
   )
 
-  [ "${expected_content}" == "${result_content}" ]
+  assert_equal "${expected_content}" "${result_content}"
 }
 
 assert_changelog_file() {
@@ -140,7 +141,7 @@ EOF
     cat "${TEST_WORKING_DIR}/decomposer.autoload.inc.php"
   )
 
-  [ "${expected_content}" == "${result_content}" ]
+  assert_equal "${expected_content}" "${result_content}"
 }
 
 assert_decomposer_file() {

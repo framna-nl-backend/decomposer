@@ -14,8 +14,8 @@ SUITE_NAME=$( test_suite_name )
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -30,8 +30,8 @@ SUITE_NAME=$( test_suite_name )
   local beta_lib_revision_hash="$( create_repository beta-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Beta...done" ]
+  assert_success
+  assert_output "Installing Beta...done"
 
   assert_lib_installed Beta-1.0 "${beta_lib_revision_hash}"
 
@@ -47,9 +47,9 @@ SUITE_NAME=$( test_suite_name )
   local beta_lib_revision_hash="$( create_repository beta-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
-  [ "${lines[1]}" = "Installing Beta...done" ]
+  assert_success
+  assert_line "Installing Alpha...done"
+  assert_line "Installing Beta...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   assert_lib_installed Beta-1.0 "${beta_lib_revision_hash}"
@@ -69,8 +69,8 @@ SUITE_NAME=$( test_suite_name )
   create_lib_autoload_file Alpha-1.0 beta_psr0
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_autoload_file Alpha-1.0 alpha_psr4
 }
@@ -84,8 +84,8 @@ SUITE_NAME=$( test_suite_name )
   create_project_autoload_file Alpha-1.0 Beta-1.0
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_project_autoload_file Alpha-1.0
 }
@@ -109,8 +109,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
 }
@@ -134,8 +134,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
 }
@@ -159,8 +159,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${branch_alpha_lib_revision_hash}"
 }
@@ -183,8 +183,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${commit_alpha_lib_revision_hash}"
 }
@@ -209,8 +209,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   ! assert_lib_contains  Alpha-1.0 "${commit_alpha_lib_revision_hash}"
@@ -238,8 +238,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
   ! assert_lib_contains  Alpha-1.0 "${commit_alpha_lib_revision_hash}"
@@ -251,8 +251,8 @@ SUITE_NAME=$( test_suite_name )
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -267,8 +267,8 @@ SUITE_NAME=$( test_suite_name )
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -283,8 +283,8 @@ SUITE_NAME=$( test_suite_name )
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 

@@ -1,3 +1,6 @@
+bats_load_library bats-assert
+bats_load_library bats-support
+
 load helpers/variables
 load helpers/hooks
 load helpers/main
@@ -9,23 +12,23 @@ SUITE_NAME=$( test_suite_name )
 
 @test "${SUITE_NAME}: missing command" {
   run_decomposer
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: Missing command" ]
-  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+  assert_failure
+  assert_line "decomposer: Missing command"
+  assert_line "Try 'decomposer help' for more information."
 }
 
 @test "${SUITE_NAME}: invalid command" {
   run_decomposer xxx
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: Invalid command 'xxx'" ]
-  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+  assert_failure
+  assert_line "decomposer: Invalid command 'xxx'"
+  assert_line "Try 'decomposer help' for more information."
 }
 
 @test "${SUITE_NAME}: install without decomposer.json" {
   run_decomposer install
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: No decomposer.json found." ]
-  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+  assert_failure
+  assert_line "decomposer: No decomposer.json found."
+  assert_line "Try 'decomposer help' for more information."
 }
 
 @test "${SUITE_NAME}: target directory doesn't exist" {
@@ -34,9 +37,9 @@ SUITE_NAME=$( test_suite_name )
   export DECOMPOSER_TARGET_DIR='/xxx'
 
   run_decomposer install
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: DECOMPOSER_TARGET_DIR '/xxx' is not a writable directory." ]
-  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+  assert_failure
+  assert_line "decomposer: DECOMPOSER_TARGET_DIR '/xxx' is not a writable directory."
+  assert_line "Try 'decomposer help' for more information."
 }
 
 @test "${SUITE_NAME}: target directory is a file" {
@@ -46,9 +49,9 @@ SUITE_NAME=$( test_suite_name )
   touch "${TEST_TMP_DIR}/file"
 
   run_decomposer install
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: DECOMPOSER_TARGET_DIR '${TEST_TMP_DIR}/file' is not a writable directory." ]
-  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+  assert_failure
+  assert_line "decomposer: DECOMPOSER_TARGET_DIR '${TEST_TMP_DIR}/file' is not a writable directory."
+  assert_line "Try 'decomposer help' for more information."
 }
 
 @test "${SUITE_NAME}: target directory is not writable" {
@@ -57,7 +60,7 @@ SUITE_NAME=$( test_suite_name )
   chmod -w "${DECOMPOSER_TARGET_DIR}"
 
   run_decomposer install
-  [ "${status}" -eq 1 ]
-  [ "${lines[0]}" = "decomposer: DECOMPOSER_TARGET_DIR '${DECOMPOSER_TARGET_DIR}' is not a writable directory." ]
-  [ "${lines[1]}" = "Try 'decomposer help' for more information." ]
+  assert_failure
+  assert_line "decomposer: DECOMPOSER_TARGET_DIR '${DECOMPOSER_TARGET_DIR}' is not a writable directory."
+  assert_line "Try 'decomposer help' for more information."
 }

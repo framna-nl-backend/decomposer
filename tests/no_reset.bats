@@ -21,8 +21,8 @@ SUITE_NAME=$( test_suite_name )
   echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -43,8 +43,8 @@ SUITE_NAME=$( test_suite_name )
   echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -65,8 +65,8 @@ SUITE_NAME=$( test_suite_name )
   echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -87,8 +87,8 @@ SUITE_NAME=$( test_suite_name )
   echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -111,8 +111,8 @@ SUITE_NAME=$( test_suite_name )
   echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -133,8 +133,8 @@ SUITE_NAME=$( test_suite_name )
   echo change > "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README"
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 

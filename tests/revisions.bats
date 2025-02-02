@@ -19,8 +19,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -40,8 +40,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -61,8 +61,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -82,8 +82,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -103,8 +103,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -124,8 +124,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
@@ -150,8 +150,8 @@ SUITE_NAME=$( test_suite_name )
   )
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${branch_alpha_lib_revision_hash}"
 
@@ -172,8 +172,8 @@ SUITE_NAME=$( test_suite_name )
     --allow-empty --message 'extra commit'
 
   run_decomposer install
-  [ "${status}" -eq 0 ]
-  [ "${lines[0]}" = "Installing Alpha...done" ]
+  assert_success
+  assert_output "Installing Alpha...done"
 
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
