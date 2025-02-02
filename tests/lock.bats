@@ -15,7 +15,7 @@ SUITE_NAME=$( test_suite_name )
   [ "${status}" -eq 1 ]
   [ "${lines[0]}" = "decomposer: File '/root/changelog.fail' is not writable." ]
 
-  [[ ! -f "/root/changelog.fail" ]]
+  assert_file_not_exists "/root/changelog.fail"
 }
 
 @test "${SUITE_NAME}: new decomposer.json pointing to non writable file" {

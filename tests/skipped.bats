@@ -75,5 +75,5 @@ SUITE_NAME=$( test_suite_name )
   [ "${lines[0]}" = "Installing Alpha...skipped (not a git repository)" ]
 
   # assert there was no change to the file
-  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }

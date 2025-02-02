@@ -1,3 +1,6 @@
+bats_load_library bats-file
+bats_load_library bats-support
+
 md5checksum_decomposer_json() {
   local file="${TEST_WORKING_DIR}/decomposer.json"
 
@@ -12,7 +15,7 @@ assert_lib_installed() {
   local lib_name_version="$1"
   local expected_head_hash="$2"
 
-  [ -d "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" ]
+  assert_dir_exists "${DECOMPOSER_TARGET_DIR}/${lib_name_version}"
 
   local result_head_hash=$(
     git -C "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" \
@@ -26,14 +29,14 @@ assert_lib_not_installed() {
   local lib_name_version="$1"
   local expected_head_hash="$2"
 
-  ! [ -d "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" ]
+  assert_dir_not_exists "${DECOMPOSER_TARGET_DIR}/${lib_name_version}"
 }
 
 assert_lib_contains() {
   local lib_name_version="$1"
   local revision="$2"
 
-  [ -d "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" ]
+  assert_dir_exists "${DECOMPOSER_TARGET_DIR}/${lib_name_version}"
 
   local object_type=$(
     git -C "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" \
@@ -47,7 +50,7 @@ assert_lib_autoload_file() {
   local lib_name_version="$1"
   local fixture_name="$2"
 
-  [ -f "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php" ]
+  assert_file_exists "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php"
 
   local expected_content=$(
     cat "${TEST_FIXTURES_DIR}/autoload_lib/${fixture_name}.php"
@@ -64,13 +67,13 @@ assert_lib_no_autoload_file() {
   local lib_name_version="$1"
   local fixture_name="$2"
 
-  ! [ -f "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php" ]
+  assert_file_not_exists "${DECOMPOSER_TARGET_DIR}/${lib_name_version}.php"
 }
 
 assert_project_autoload_file_without_check() {
   local lib_name_versions="$@"
 
-  [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
+  assert_file_exists "${TEST_WORKING_DIR}/decomposer.autoload.inc.php"
 
   local expected_content=$(
     printf '<?php\n\n';
@@ -91,7 +94,7 @@ assert_changelog_file() {
   local changelog_file="$1"
   local fixture_name="$2"
 
-  [ -f "${changelog_file}" ]
+  assert_file_exists "${changelog_file}"
 
   local expected_content=$(
     cat "${TEST_FIXTURES_DIR}/changelog/${fixture_name}"
@@ -112,7 +115,7 @@ assert_changelog_file() {
 assert_project_autoload_file() {
   local lib_name_versions="$@"
 
-  [ -f "${TEST_WORKING_DIR}/decomposer.autoload.inc.php" ]
+  assert_file_exists "${TEST_WORKING_DIR}/decomposer.autoload.inc.php"
 
   local expected_content=$(
     cat << EOF
@@ -145,7 +148,7 @@ assert_decomposer_file() {
   shift
   local fixture_names="$@"
 
-  [ -f "${decomposer_file}" ]
+  assert_file_exists "${decomposer_file}"
 
   local new_decomposer_file=$( mktemp )
 

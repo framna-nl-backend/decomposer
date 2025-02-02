@@ -27,7 +27,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
 @test "${SUITE_NAME}: correct alternative tag with non commited modifications" {
@@ -49,7 +49,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
 @test "${SUITE_NAME}: correct annotated tag with non commited modifications" {
@@ -71,7 +71,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
 @test "${SUITE_NAME}: correct alternative annotated tag with non commited modifications" {
@@ -93,7 +93,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
 @test "${SUITE_NAME}: correct branch with non commited modifications" {
@@ -117,7 +117,7 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
 
 @test "${SUITE_NAME}: correct commit with non commited modifications" {
@@ -139,5 +139,5 @@ SUITE_NAME=$( test_suite_name )
   assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
 
   # assert there was no change to the file
-  [ $( cat "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" ) = 'change' ]
+  assert_file_contains "${DECOMPOSER_TARGET_DIR}/Alpha-1.0/README" '^change$'
 }
