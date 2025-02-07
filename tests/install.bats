@@ -245,7 +245,39 @@ BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
   ! assert_lib_contains  Alpha-1.0 "${commit_alpha_lib_revision_hash}"
 }
 
-@test "single new PSR-4 library with multiple paths" {
+@test "${SUITE_NAME}: existing library fetches from default remote" {
+  local alpha_lib_revision_hash="$( create_repository alpha-lib )"
+
+  # create decomposer.json
+  create_decomposer_json alpha_tag_revision
+
+  # tag current HEAD
+  git -C "${TEST_REPOS_DIR}/alpha-lib" tag alpha-lib-1.0 -a -m 'tag'
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
+
+  # create new commit on top
+  git -C "${TEST_REPOS_DIR}/alpha-lib" commit \
+    --allow-empty --message 'extra commit'
+
+  local commit_alpha_lib_revision_hash=$(
+    git -C "${TEST_REPOS_DIR}/alpha-lib" \
+      rev-parse HEAD
+  )
+
+  # set default remote
+  git -C "${TEST_REPOS_DIR}/alpha-lib" config set checkout.defaultremote test
+
+  run_decomposer install
+  assert_success
+  assert_output "Installing Alpha...done"
+
+  assert_lib_installed Alpha-1.0 "${alpha_lib_revision_hash}"
+  ! assert_lib_contains  Alpha-1.0 "${commit_alpha_lib_revision_hash}"
+}
+
+@test "${SUITE_NAME}: single new PSR-4 library with multiple paths" {
   create_decomposer_json alpha_psr4_multi
 
   local alpha_lib_revision_hash="$( create_repository alpha-lib )"
