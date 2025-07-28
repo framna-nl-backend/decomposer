@@ -115,7 +115,33 @@ BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
   assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
 }
 
-@test "existing library fetches new annotated tag" {
+@test "${SUITE_NAME}: existing library resets upstream" {
+  create_decomposer_json alpha_tag_version
+
+  create_repository alpha-lib
+
+  # create usual clone of library
+  git clone "${TEST_REPOS_DIR}/alpha-lib" "${DECOMPOSER_TARGET_DIR}/Alpha-1.0"
+
+  # Change remote URL to a different one
+  git -C "${DECOMPOSER_TARGET_DIR}/Alpha-1.0" remote set-url origin https://moveagency.com
+
+  run_decomposer install
+  [ "${status}" -eq 0 ]
+  [ "${lines[0]}" = "Installing Alpha...done" ]
+
+  assert_lib_installed Alpha-1.0 "${tag_alpha_lib_revision_hash}"
+
+  [ -d "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" ]
+
+  local install_remote=$(
+    git -C "${DECOMPOSER_TARGET_DIR}/${lib_name_version}" remote get-url origin
+  )
+
+  [ "${install_remote}" == "${TEST_REPOS_DIR}/alpha-lib" ]
+}
+
+@test "${SUITE_NAME}: existing library fetches new annotated tag" {
   create_decomposer_json alpha_tag_version
 
   create_repository alpha-lib
