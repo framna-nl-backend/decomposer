@@ -273,6 +273,12 @@ print_library_require() {
   local name="$1"
   local object="$2"
 
+  dev=$( jq -r '."development-only"' <<< "${object}" )
+
+  if [ "$dev" = "true" ] && [ $INSTALL_DEV_DEPENDENCIES = 0 ]; then
+    return 2
+  fi
+
   version=$( jq -r '.version' <<< "${object}" )
   printf "require_once '%s-%s.php';\\n" "${name}" "${version}"
 }

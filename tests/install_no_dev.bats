@@ -87,5 +87,5 @@ BATS_TEST_NAME_PREFIX="$( test_suite_name ): "
 
   assert_lib_no_autoload_file Alpha-1.0
 
-  assert_project_autoload_file_without_check Alpha-1.0
+  assert_project_autoload_file_without_check
 }
