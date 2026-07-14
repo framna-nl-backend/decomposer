@@ -44,7 +44,8 @@ jobs:
         continue-on-error: true
         run: |
           # shellcheck disable=SC2086
-          files=$(find share/ libexec/ -type f)
+          # exclude non-shell files (e.g. *.jq) from shellcheck
+          files=$(find share/ libexec/ -type f ! -name '*.jq')
           # shellcheck disable=SC2086
           shellcheck --format=checkstyle --shell=bash bin/decomposer $files > shellcheck-result.xml
 
