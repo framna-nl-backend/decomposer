@@ -67,17 +67,19 @@ jobs:
       - name: Install JSON schema
         run: pip install check-jsonschema
 
-      - name: Fetch decomposer.json from Lunr
-        run: curl -o decomposer.json https://raw.githubusercontent.com/lunr-php/lunr/HEAD/decomposer.json
+      - name: Clone a project that uses Decomposer
+        run: git clone https://github.com/lunr-php/lunr.git /tmp/lunr
 
       - name: Create target dir
         run: mkdir -p "$DECOMPOSER_TARGET_DIR"
 
       - name: Install libraries
-        run: bin/decomposer install
+        working-directory: /tmp/lunr
+        run: ${{ github.workspace }}/bin/decomposer install
 
       - name: Generate SBOM
-        run: bin/decomposer sbom
+        working-directory: /tmp/lunr
+        run: ${{ github.workspace }}/bin/decomposer sbom
 
       - name: Validate
-        run: check-jsonschema --schemafile https://raw.githubusercontent.com/spdx/spdx-spec/v2.3/schemas/spdx-schema.json decomposer.sbom.json
+        run: check-jsonschema --schemafile https://raw.githubusercontent.com/spdx/spdx-spec/v2.3/schemas/spdx-schema.json /tmp/lunr/decomposer.sbom.json

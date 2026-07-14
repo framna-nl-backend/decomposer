@@ -7,6 +7,7 @@ trap 'rm "${TMP_FILE}"' EXIT
 
 SBOM_FILE=${CWD}/decomposer.sbom.json
 NAMESPACE="$(git remote get-url origin)#$(git rev-parse HEAD)/$(basename "$SBOM_FILE")"
+PROJECT_VERSION="$(git describe --tags --always 2> /dev/null || echo 'NOASSERTION')"
 
 parse_arguments() {
   while [ "$#" -gt 0 ]; do
@@ -64,6 +65,7 @@ process_file() {
     jq --argjson packages "$(sed 's/,}$/}/' "${TMP_FILE}")" \
        --arg name "$(basename "${CWD}")" \
        --arg version "${DECOMPOSER_VERSION}" \
+       --arg project_version "${PROJECT_VERSION}" \
        --arg namespace "$NAMESPACE" \
       --from-file "${DECOMPOSER_ROOT}/share/decomposer/sbom.jq" > "${SBOM_FILE}"
 }
