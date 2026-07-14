@@ -53,3 +53,31 @@ jobs:
         with:
           files: shellcheck-result.xml
           notices-as-warnings: true # optional
+
+  jsonschema:
+    name: jsonschema
+    runs-on: ubuntu-latest
+    env:
+      DECOMPOSER_TARGET_DIR: /tmp/decomposer
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Install JSON schema
+        run: pip install check-jsonschema
+
+      - name: Fetch decomposer.json from Lunr
+        run: curl -o decomposer.json https://raw.githubusercontent.com/lunr-php/lunr/HEAD/decomposer.json
+
+      - name: Create target dir
+        run: mkdir -p "$DECOMPOSER_TARGET_DIR"
+
+      - name: Install libraries
+        run: bin/decomposer install
+
+      - name: Generate SBOM
+        run: bin/decomposer sbom
+
+      - name: Validate
+        run: check-jsonschema --schemafile https://raw.githubusercontent.com/spdx/spdx-spec/v2.3/schemas/spdx-schema.json decomposer.sbom.json
